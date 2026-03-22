@@ -1,0 +1,59 @@
+Same cycle. On your Mac:
+
+```bash
+cd ~/tabtools
+nano site/index.html
+```
+
+Fix the typo, save, then:
+
+```bash
+git add site/index.html
+git commit -m "Fix typo in placeholder text"
+git push
+```
+
+Then on the server:
+
+```bash
+cd /var/www/tabtools.dev
+git pull
+```
+
+Refresh the browser. This is the workflow for everything — even a one-character fix.
+
+----------------------------
+
+Do it. On your Mac:
+
+```bash
+cd ~/tabtools
+nano site/index.html
+```
+
+Change the text to whatever you want — something like "TabTools.dev — tools are coming" or anything. Save it, then:
+
+```bash
+git add site/index.html
+git commit -m "Update placeholder text to test deployment workflow"
+git push
+```
+
+Then SSH into your server:
+
+```bash
+ssh eber@146.190.133.14
+cd /var/www/tabtools.dev
+git pull
+```
+
+Refresh tabtools.dev in your browser. You should see your new text. That's the full cycle — edit, commit, push, pull, live.
+
+That's because we created `site/index.html` manually on the server before it was tracked in Git. Just remove it and pull again:
+
+```bash
+rm site/index.html
+git pull
+```
+
+This is a one-time thing — from now on, all files come from Git so this won't happen again.
