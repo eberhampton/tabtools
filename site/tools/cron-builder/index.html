@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cron Expression Builder — TabTools.dev</title>
+  <meta name="description" content="Visual cron schedule builder. Plain English translation, next run times, common presets. Free, fast, no sign-up.">
+  <meta property="og:title" content="Cron Expression Builder — TabTools.dev">
+  <meta property="og:description" content="Build cron expressions visually. See plain English translations and upcoming run times instantly.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tabtools.dev/tools/cron-builder/">
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    .cron-expression-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: var(--bg-deep);
+      border-bottom: 1px solid var(--border-panel);
+      flex-wrap: wrap;
+    }
+
+    .cron-expression-display {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 2px;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .cron-english {
+      font-size: 13px;
+      color: var(--text-secondary);
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-panel);
+      line-height: 1.5;
+    }
+
+    .cron-english span {
+      color: var(--text-primary);
+    }
+
+    .cron-builder-body {
+      padding: 1.25rem 14px;
+    }
+
+    .cron-field {
+      margin-bottom: 1.25rem;
+    }
+
+    .cron-field:last-child {
+      margin-bottom: 0;
+    }
+
+    .cron-field-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .cron-field-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    .cron-field-value {
+      font-size: 12px;
+      color: var(--accent);
+    }
+
+    .cron-field-options {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .cron-option {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: var(--radius);
+      background: var(--btn-secondary-bg);
+      color: var(--btn-secondary-text);
+      border: 1px solid var(--border-button);
+      cursor: pointer;
+      transition: background 0.1s, color 0.1s, border-color 0.1s;
+      min-width: 36px;
+      text-align: center;
+    }
+
+    .cron-option:hover {
+      color: var(--text-primary);
+      border-color: var(--text-muted);
+    }
+
+    .cron-option.selected {
+      background: var(--accent);
+      color: var(--bg-primary);
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+
+    .cron-option.wildcard {
+      letter-spacing: 0.5px;
+    }
+
+    .cron-section-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .cron-presets {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      padding: 14px;
+      border-bottom: 1px solid var(--border-panel);
+    }
+
+    .cron-preset {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 5px 12px;
+      border-radius: var(--radius);
+      background: var(--btn-secondary-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border-button);
+      cursor: pointer;
+      transition: color 0.1s, border-color 0.1s;
+    }
+
+    .cron-preset:hover {
+      color: var(--text-primary);
+      border-color: var(--text-muted);
+    }
+
+    .cron-preset.active {
+      color: var(--text-primary);
+      border-color: var(--text-primary);
+    }
+
+    .next-runs {
+      padding: 14px;
+      border-top: 1px solid var(--border-panel);
+    }
+
+    .next-runs-title {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .next-runs-list {
+      list-style: none;
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    .next-runs-list li::before {
+      content: '▸ ';
+      color: var(--accent);
+    }
+
+    .reverse-section {
+      margin-top: 16px;
+    }
+
+    .reverse-input-wrap {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .reverse-input {
+      flex: 1;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      padding: 8px 12px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border-panel);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      outline: none;
+    }
+
+    .reverse-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .reverse-input:focus {
+      border-color: var(--border-button);
+    }
+
+    .copy-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--accent);
+      color: var(--bg-primary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 20px;
+      border-radius: var(--radius);
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .copy-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 640px) {
+      .cron-expression-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .cron-expression-display {
+        font-size: 16px;
+      }
+
+      .cron-presets {
+        gap: 4px;
+      }
+
+      .reverse-input-wrap {
+        flex-direction: column;
+      }
+
+      .reverse-input-wrap .btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="/" class="site-logo">
+      <div class="logo-dot"></div>
+      <div class="logo-text">
+        <span class="logo-tab">tab</span><span class="logo-tools">tools</span><span class="logo-tld">.dev</span>
+      </div>
+    </a>
+    <nav class="site-nav">
+      <a href="/tools/json-formatter/">JSON</a>
+      <a href="/tools/cron-builder/" class="active">CRON</a>
+      <a href="/tools/webhook-tester/">WEBHOOK</a>
+    </nav>
+  </header>
+
+  <main class="site-main">
+
+    <div class="tool-panel">
+      <div class="tool-panel-header">
+        <span class="tool-panel-title">cron builder</span>
+        <div class="tool-panel-dots">
+          <div class="tool-panel-dot"></div>
+          <div class="tool-panel-dot"></div>
+          <div class="tool-panel-dot active"></div>
+        </div>
+      </div>
+
+      <div class="cron-expression-bar">
+        <div class="cron-expression-display" id="cronDisplay">* * * * *</div>
+        <button class="btn btn-primary" onclick="copyExpression()">COPY</button>
+      </div>
+
+      <div class="cron-english" id="cronEnglish">
+        <span>Every minute</span>
+      </div>
+
+      <div class="cron-presets">
+        <span class="cron-section-label" style="width: 100%; margin-bottom: 4px;">PRESETS</span>
+        <button class="cron-preset active" onclick="applyPreset('* * * * *', this)">every minute</button>
+        <button class="cron-preset" onclick="applyPreset('*/5 * * * *', this)">every 5 min</button>
+        <button class="cron-preset" onclick="applyPreset('*/15 * * * *', this)">every 15 min</button>
+        <button class="cron-preset" onclick="applyPreset('0 * * * *', this)">hourly</button>
+        <button class="cron-preset" onclick="applyPreset('0 0 * * *', this)">daily midnight</button>
+        <button class="cron-preset" onclick="applyPreset('0 7 * * *', this)">daily 7am</button>
+        <button class="cron-preset" onclick="applyPreset('0 7 * * 0', this)">sundays 7am</button>
+        <button class="cron-preset" onclick="applyPreset('0 7 1 * *', this)">1st of month</button>
+        <button class="cron-preset" onclick="applyPreset('0 3 * * *', this)">daily 3am</button>
+      </div>
+
+      <div class="cron-builder-body">
+
+        <div class="cron-field">
+          <div class="cron-field-header">
+            <span class="cron-field-label">MINUTE</span>
+            <span class="cron-field-value" id="minuteValue">*</span>
+          </div>
+          <div class="cron-field-options" id="minuteOptions"></div>
+        </div>
+
+        <div class="cron-field">
+          <div class="cron-field-header">
+            <span class="cron-field-label">HOUR</span>
+            <span class="cron-field-value" id="hourValue">*</span>
+          </div>
+          <div class="cron-field-options" id="hourOptions"></div>
+        </div>
+
+        <div class="cron-field">
+          <div class="cron-field-header">
+            <span class="cron-field-label">DAY OF MONTH</span>
+            <span class="cron-field-value" id="domValue">*</span>
+          </div>
+          <div class="cron-field-options" id="domOptions"></div>
+        </div>
+
+        <div class="cron-field">
+          <div class="cron-field-header">
+            <span class="cron-field-label">MONTH</span>
+            <span class="cron-field-value" id="monthValue">*</span>
+          </div>
+          <div class="cron-field-options" id="monthOptions"></div>
+        </div>
+
+        <div class="cron-field">
+          <div class="cron-field-header">
+            <span class="cron-field-label">DAY OF WEEK</span>
+            <span class="cron-field-value" id="dowValue">*</span>
+          </div>
+          <div class="cron-field-options" id="dowOptions"></div>
+        </div>
+
+      </div>
+
+      <div class="next-runs" id="nextRuns">
+        <div class="next-runs-title">NEXT 5 RUNS</div>
+        <ul class="next-runs-list" id="nextRunsList"></ul>
+      </div>
+    </div>
+
+    <div class="reverse-section">
+      <div class="input-header" style="margin-bottom: 8px;">
+        <span class="input-label">REVERSE</span>
+        <span class="input-hint">paste a cron expression to decode it</span>
+      </div>
+      <div class="reverse-input-wrap">
+        <input type="text" class="reverse-input" id="reverseInput" placeholder="$ 0 7 * * 0" spellcheck="false">
+        <button class="btn btn-primary" onclick="reverseCron()">DECODE</button>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <span>fast. clean. no clutter.</span>
+    <span>free tools · <a href="https://ko-fi.com/bobrew">buy me a coffee</a></span>
+  </footer>
+
+  <div class="copy-toast" id="copyToast">COPIED</div>
+
+  <script>
+    var state = {
+      minute: '*',
+      hour: '*',
+      dom: '*',
+      month: '*',
+      dow: '*'
+    };
+
+    var monthNames = ['', 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    var dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    var fullDayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    var fullMonthNames = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    function init() {
+      buildMinuteOptions();
+      buildHourOptions();
+      buildDomOptions();
+      buildMonthOptions();
+      buildDowOptions();
+      update();
+    }
+
+    function buildMinuteOptions() {
+      var container = document.getElementById('minuteOptions');
+      var html = '<div class="cron-option wildcard selected" data-field="minute" data-value="*" onclick="selectOption(this)">*</div>';
+      for (var i = 0; i < 60; i += 5) {
+        html += '<div class="cron-option" data-field="minute" data-value="' + i + '" onclick="selectOption(this)">' + i + '</div>';
+      }
+      container.innerHTML = html;
+    }
+
+    function buildHourOptions() {
+      var container = document.getElementById('hourOptions');
+      var html = '<div class="cron-option wildcard selected" data-field="hour" data-value="*" onclick="selectOption(this)">*</div>';
+      for (var i = 0; i < 24; i++) {
+        var label = i === 0 ? '12a' : i < 12 ? i + 'a' : i === 12 ? '12p' : (i - 12) + 'p';
+        html += '<div class="cron-option" data-field="hour" data-value="' + i + '" onclick="selectOption(this)">' + label + '</div>';
+      }
+      container.innerHTML = html;
+    }
+
+    function buildDomOptions() {
+      var container = document.getElementById('domOptions');
+      var html = '<div class="cron-option wildcard selected" data-field="dom" data-value="*" onclick="selectOption(this)">*</div>';
+      for (var i = 1; i <= 31; i++) {
+        html += '<div class="cron-option" data-field="dom" data-value="' + i + '" onclick="selectOption(this)">' + i + '</div>';
+      }
+      container.innerHTML = html;
+    }
+
+    function buildMonthOptions() {
+      var container = document.getElementById('monthOptions');
+      var html = '<div class="cron-option wildcard selected" data-field="month" data-value="*" onclick="selectOption(this)">*</div>';
+      for (var i = 1; i <= 12; i++) {
+        html += '<div class="cron-option" data-field="month" data-value="' + i + '" onclick="selectOption(this)">' + monthNames[i] + '</div>';
+      }
+      container.innerHTML = html;
+    }
+
+    function buildDowOptions() {
+      var container = document.getElementById('dowOptions');
+      var html = '<div class="cron-option wildcard selected" data-field="dow" data-value="*" onclick="selectOption(this)">*</div>';
+      for (var i = 0; i < 7; i++) {
+        html += '<div class="cron-option" data-field="dow" data-value="' + i + '" onclick="selectOption(this)">' + dayNames[i] + '</div>';
+      }
+      container.innerHTML = html;
+    }
+
+    function selectOption(el) {
+      var field = el.getAttribute('data-field');
+      var value = el.getAttribute('data-value');
+
+      var container = el.parentElement;
+      var options = container.querySelectorAll('.cron-option');
+      options.forEach(function(opt) { opt.classList.remove('selected'); });
+
+      el.classList.add('selected');
+      state[field] = value;
+
+      clearPresetHighlight();
+      update();
+    }
+
+    function update() {
+      var expr = state.minute + ' ' + state.hour + ' ' + state.dom + ' ' + state.month + ' ' + state.dow;
+      document.getElementById('cronDisplay').textContent = expr;
+
+      document.getElementById('minuteValue').textContent = state.minute;
+      document.getElementById('hourValue').textContent = state.hour;
+      document.getElementById('domValue').textContent = state.dom;
+      document.getElementById('monthValue').textContent = state.month;
+      document.getElementById('dowValue').textContent = state.dow;
+
+      document.getElementById('cronEnglish').innerHTML = '<span>' + toEnglish(state) + '</span>';
+
+      renderNextRuns(state);
+    }
+
+    function toEnglish(s) {
+      var parts = [];
+
+      if (s.minute === '*' && s.hour === '*' && s.dom === '*' && s.month === '*' && s.dow === '*') {
+        return 'Every minute';
+      }
+
+      if (s.minute.indexOf('/') === 0 || (s.minute !== '*' && s.minute.indexOf('/') > -1)) {
+        return 'Every ' + s.minute.split('/')[1] + ' minutes' + hourPart(s) + domPart(s) + monthPart(s) + dowPart(s);
+      }
+
+      var timeStr = '';
+      if (s.minute !== '*' && s.hour !== '*') {
+        var h = parseInt(s.hour);
+        var m = parseInt(s.minute);
+        var ampm = h >= 12 ? 'PM' : 'AM';
+        var displayH = h === 0 ? 12 : h > 12 ? h - 12 : h;
+        timeStr = 'At ' + displayH + ':' + (m < 10 ? '0' + m : m) + ' ' + ampm;
+      } else if (s.minute !== '*' && s.hour === '*') {
+        timeStr = 'At minute ' + s.minute + ' of every hour';
+      } else if (s.minute === '*' && s.hour !== '*') {
+        var h = parseInt(s.hour);
+        var ampm = h >= 12 ? 'PM' : 'AM';
+        var displayH = h === 0 ? 12 : h > 12 ? h - 12 : h;
+        timeStr = 'Every minute of ' + displayH + ' ' + ampm + ' hour';
+      }
+
+      var whenStr = '';
+      if (s.dow !== '*' && s.dom === '*') {
+        whenStr = ' on ' + fullDayNames[parseInt(s.dow)] + 's';
+      } else if (s.dom !== '*' && s.dow === '*') {
+        whenStr = ' on day ' + s.dom + ' of the month';
+      } else if (s.dom !== '*' && s.dow !== '*') {
+        whenStr = ' on day ' + s.dom + ' and ' + fullDayNames[parseInt(s.dow)] + 's';
+      }
+
+      if (s.month !== '*') {
+        whenStr += ' in ' + fullMonthNames[parseInt(s.month)];
+      }
+
+      if (!timeStr && !whenStr) {
+        return 'Every minute';
+      }
+
+      return (timeStr || 'Every minute') + whenStr;
+    }
+
+    function hourPart(s) {
+      if (s.hour === '*') return '';
+      var h = parseInt(s.hour);
+      var ampm = h >= 12 ? 'PM' : 'AM';
+      var displayH = h === 0 ? 12 : h > 12 ? h - 12 : h;
+      return ' during ' + displayH + ' ' + ampm + ' hour';
+    }
+
+    function domPart(s) {
+      if (s.dom === '*') return '';
+      return ' on day ' + s.dom;
+    }
+
+    function monthPart(s) {
+      if (s.month === '*') return '';
+      return ' in ' + fullMonthNames[parseInt(s.month)];
+    }
+
+    function dowPart(s) {
+      if (s.dow === '*') return '';
+      return ' on ' + fullDayNames[parseInt(s.dow)] + 's';
+    }
+
+    function renderNextRuns(s) {
+      var list = document.getElementById('nextRunsList');
+      var runs = getNextRuns(s, 5);
+      var html = '';
+      runs.forEach(function(d) {
+        html += '<li>' + formatDate(d) + '</li>';
+      });
+      list.innerHTML = html;
+    }
+
+    function getNextRuns(s, count) {
+      var results = [];
+      var now = new Date();
+      var check = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes() + 1, 0, 0);
+      var maxIterations = 525600;
+
+      while (results.length < count && maxIterations > 0) {
+        if (matches(s, check)) {
+          results.push(new Date(check));
+        }
+        check = new Date(check.getTime() + 60000);
+        maxIterations--;
+      }
+
+      return results;
+    }
+
+    function matches(s, date) {
+      var minute = date.getMinutes();
+      var hour = date.getHours();
+      var dom = date.getDate();
+      var month = date.getMonth() + 1;
+      var dow = date.getDay();
+
+      if (!matchField(s.minute, minute)) return false;
+      if (!matchField(s.hour, hour)) return false;
+      if (!matchField(s.dom, dom)) return false;
+      if (!matchField(s.month, month)) return false;
+      if (!matchField(s.dow, dow)) return false;
+
+      return true;
+    }
+
+    function matchField(pattern, value) {
+      if (pattern === '*') return true;
+
+      if (pattern.indexOf('/') > -1) {
+        var parts = pattern.split('/');
+        var base = parts[0] === '*' ? 0 : parseInt(parts[0]);
+        var step = parseInt(parts[1]);
+        return (value - base) % step === 0 && value >= base;
+      }
+
+      if (pattern.indexOf(',') > -1) {
+        var vals = pattern.split(',').map(function(v) { return parseInt(v); });
+        return vals.indexOf(value) > -1;
+      }
+
+      if (pattern.indexOf('-') > -1) {
+        var range = pattern.split('-');
+        return value >= parseInt(range[0]) && value <= parseInt(range[1]);
+      }
+
+      return parseInt(pattern) === value;
+    }
+
+    function formatDate(d) {
+      var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      var h = d.getHours();
+      var m = d.getMinutes();
+      var ampm = h >= 12 ? 'PM' : 'AM';
+      var displayH = h === 0 ? 12 : h > 12 ? h - 12 : h;
+      return days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() + ' at ' + displayH + ':' + (m < 10 ? '0' + m : m) + ' ' + ampm;
+    }
+
+    function applyPreset(expr, el) {
+      var parts = expr.split(' ');
+      state.minute = parts[0];
+      state.hour = parts[1];
+      state.dom = parts[2];
+      state.month = parts[3];
+      state.dow = parts[4];
+
+      syncSelections();
+
+      document.querySelectorAll('.cron-preset').forEach(function(p) { p.classList.remove('active'); });
+      if (el) el.classList.add('active');
+
+      update();
+    }
+
+    function syncSelections() {
+      syncField('minute', state.minute);
+      syncField('hour', state.hour);
+      syncField('dom', state.dom);
+      syncField('month', state.month);
+      syncField('dow', state.dow);
+    }
+
+    function syncField(field, value) {
+      var container = document.getElementById(field + 'Options');
+      if (!container) return;
+      var options = container.querySelectorAll('.cron-option');
+      options.forEach(function(opt) {
+        opt.classList.remove('selected');
+        if (opt.getAttribute('data-value') === value) {
+          opt.classList.add('selected');
+        }
+      });
+    }
+
+    function clearPresetHighlight() {
+      document.querySelectorAll('.cron-preset').forEach(function(p) { p.classList.remove('active'); });
+    }
+
+    function copyExpression() {
+      var expr = state.minute + ' ' + state.hour + ' ' + state.dom + ' ' + state.month + ' ' + state.dow;
+      navigator.clipboard.writeText(expr).then(function() {
+        var toast = document.getElementById('copyToast');
+        toast.classList.add('show');
+        setTimeout(function() { toast.classList.remove('show'); }, 1500);
+      });
+    }
+
+    function reverseCron() {
+      var input = document.getElementById('reverseInput').value.trim();
+      if (input.startsWith('$')) input = input.substring(1).trim();
+
+      var parts = input.split(/\s+/);
+      if (parts.length !== 5) {
+        document.getElementById('cronEnglish').innerHTML = '<span style="color: #f87171;">Invalid expression — need exactly 5 fields (minute hour dom month dow)</span>';
+        return;
+      }
+
+      state.minute = parts[0];
+      state.hour = parts[1];
+      state.dom = parts[2];
+      state.month = parts[3];
+      state.dow = parts[4];
+
+      syncSelections();
+      clearPresetHighlight();
+      update();
+    }
+
+    document.getElementById('reverseInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        reverseCron();
+      }
+    });
+
+    init();
+  </script>
+
+</body>
+</html>
