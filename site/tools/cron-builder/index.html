@@ -69,7 +69,7 @@
 
     .cron-field-value {
       font-size: 12px;
-      color: var(--accent);
+      color: var(--json-string);
     }
 
     .cron-field-options {
@@ -98,9 +98,9 @@
     }
 
     .cron-option.selected {
-      background: var(--accent);
-      color: var(--bg-primary);
-      border-color: var(--accent);
+      background: var(--btn-primary-bg);
+      color: var(--btn-primary-text);
+      border-color: var(--btn-primary-bg);
       font-weight: 700;
     }
 
@@ -356,6 +356,19 @@
       <div class="reverse-input-wrap">
         <input type="text" class="reverse-input" id="reverseInput" placeholder="$ 0 7 * * 0" spellcheck="false">
         <button class="btn btn-primary" onclick="reverseCron()">DECODE</button>
+      </div>
+      <div class="reverse-readout" id="reverseReadout" style="display: none; margin-top: 12px;">
+        <div class="tool-panel">
+          <div style="padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-panel);">
+            <span style="font-size: 16px; font-weight: 700; color: var(--accent); letter-spacing: 2px;" id="reverseExpr"></span>
+            <button class="btn btn-secondary" onclick="copyReverse()" style="font-size: 11px; padding: 4px 12px;">COPY</button>
+          </div>
+          <div style="padding: 10px 14px; font-size: 13px; color: var(--text-primary);" id="reverseEnglish"></div>
+          <div style="padding: 10px 14px; border-top: 1px solid var(--border-panel);">
+            <div style="font-size: 11px; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 6px;">NEXT 5 RUNS</div>
+            <ul class="next-runs-list" id="reverseNextRuns"></ul>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -668,7 +681,10 @@
 
       var parts = input.split(/\s+/);
       if (parts.length !== 5) {
-        document.getElementById('cronEnglish').innerHTML = '<span style="color: #f87171;">Invalid expression — need exactly 5 fields (minute hour dom month dow)</span>';
+        document.getElementById('reverseReadout').style.display = 'block';
+        document.getElementById('reverseExpr').textContent = input;
+        document.getElementById('reverseEnglish').innerHTML = '<span style="color: #f87171;">Invalid — need exactly 5 fields (minute hour dom month dow)</span>';
+        document.getElementById('reverseNextRuns').innerHTML = '';
         return;
       }
 
@@ -681,6 +697,28 @@
       syncSelections();
       clearPresetHighlight();
       update();
+
+      var expr = parts.join(' ');
+      var readout = document.getElementById('reverseReadout');
+      readout.style.display = 'block';
+      document.getElementById('reverseExpr').textContent = expr;
+      document.getElementById('reverseEnglish').textContent = toEnglish(state);
+
+      var runs = getNextRuns(state, 5);
+      var html = '';
+      runs.forEach(function(d) {
+        html += '<li>' + formatDate(d) + '</li>';
+      });
+      document.getElementById('reverseNextRuns').innerHTML = html;
+    }
+
+    function copyReverse() {
+      var expr = document.getElementById('reverseExpr').textContent;
+      navigator.clipboard.writeText(expr).then(function() {
+        var toast = document.getElementById('copyToast');
+        toast.classList.add('show');
+        setTimeout(function() { toast.classList.remove('show'); }, 1500);
+      });
     }
 
     document.getElementById('reverseInput').addEventListener('keydown', function(e) {
