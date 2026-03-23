@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Webhook Tester — TabTools.dev</title>
+  <meta name="description" content="Free webhook testing tool. Get a unique URL, send requests to it, see them arrive in real time. No sign-up required.">
+  <meta property="og:title" content="Webhook Tester — TabTools.dev">
+  <meta property="og:description" content="Test webhooks instantly. Get a unique URL and watch incoming requests in real time.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tabtools.dev/tools/webhook-tester/">
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    .webhook-url-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px;
+      background: var(--bg-deep);
+      border-bottom: 1px solid var(--border-panel);
+      flex-wrap: wrap;
+    }
+
+    .webhook-url-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+
+    .webhook-url {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+      word-break: break-all;
+      min-width: 200px;
+    }
+
+    .webhook-status {
+      padding: 10px 14px;
+      font-size: 12px;
+      border-bottom: 1px solid var(--border-panel);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+
+    .status-dot.connected {
+      background: var(--accent);
+    }
+
+    .status-dot.disconnected {
+      background: #f87171;
+    }
+
+    .status-dot.waiting {
+      background: #fbbf24;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .status-text {
+      color: var(--text-secondary);
+    }
+
+    .status-count {
+      color: var(--text-muted);
+    }
+
+    .request-list {
+      list-style: none;
+    }
+
+    .request-empty {
+      padding: 3rem 14px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .request-empty .prompt {
+      color: var(--accent);
+    }
+
+    .request-empty code {
+      display: block;
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border-panel);
+      border-radius: var(--radius);
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-align: left;
+      word-break: break-all;
+      line-height: 1.6;
+    }
+
+    .request-item {
+      border-bottom: 1px solid var(--border-panel);
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .request-item:hover {
+      background: var(--bg-deep);
+    }
+
+    .request-item.expanded {
+      background: var(--bg-deep);
+    }
+
+    .request-summary {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+    }
+
+    .request-method {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--radius);
+      min-width: 52px;
+      text-align: center;
+    }
+
+    .method-GET { background: #6ee7b715; color: var(--accent); }
+    .method-POST { background: #818cf815; color: #818cf8; }
+    .method-PUT { background: #fbbf2415; color: #fbbf24; }
+    .method-DELETE { background: #f8717115; color: #f87171; }
+    .method-PATCH { background: #c084fc15; color: #c084fc; }
+    .method-HEAD { background: #94a3b815; color: #94a3b8; }
+    .method-OPTIONS { background: #94a3b815; color: #94a3b8; }
+
+    .request-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .request-size {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .request-ip {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      margin-left: auto;
+    }
+
+    .request-detail {
+      display: none;
+      padding: 0 14px 14px;
+    }
+
+    .request-item.expanded .request-detail {
+      display: block;
+    }
+
+    .detail-section {
+      margin-bottom: 12px;
+    }
+
+    .detail-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .detail-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .detail-content {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-panel);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--text-primary);
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 300px;
+      overflow: auto;
+    }
+
+    .detail-content .key { color: var(--json-key); }
+    .detail-content .string { color: var(--json-string); }
+    .detail-content .number { color: var(--json-value); }
+    .detail-content .boolean { color: var(--json-value); }
+    .detail-content .null { color: var(--text-muted); }
+
+    .header-row {
+      display: flex;
+      gap: 8px;
+      padding: 2px 0;
+    }
+
+    .header-name {
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .header-value {
+      color: var(--text-secondary);
+      word-break: break-all;
+    }
+
+    .copy-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--accent);
+      color: var(--bg-primary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 20px;
+      border-radius: var(--radius);
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .copy-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .new-badge {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: var(--bg-primary);
+      font-weight: 700;
+      animation: fadeout 3s forwards;
+    }
+
+    @keyframes fadeout {
+      0%, 70% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    @media (max-width: 640px) {
+      .webhook-url-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .webhook-url {
+        font-size: 12px;
+      }
+
+      .request-summary {
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .request-ip {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="/" class="site-logo">
+      <div class="logo-dot"></div>
+      <div class="logo-text">
+        <span class="logo-tab">tab</span><span class="logo-tools">tools</span><span class="logo-tld">.dev</span>
+      </div>
+    </a>
+    <nav class="site-nav">
+      <a href="/tools/json-formatter/">JSON</a>
+      <a href="/tools/cron-builder/">CRON</a>
+      <a href="/tools/webhook-tester/" class="active">WEBHOOK</a>
+    </nav>
+  </header>
+
+  <main class="site-main">
+
+    <div class="tool-actions" style="margin-bottom: 16px;">
+      <button class="btn btn-primary" id="btnCreate" onclick="createEndpoint()">NEW ENDPOINT</button>
+      <button class="btn btn-secondary" id="btnClear" onclick="clearRequests()" style="display: none;">CLEAR</button>
+    </div>
+
+    <div class="tool-panel" id="mainPanel" style="display: none;">
+      <div class="tool-panel-header">
+        <span class="tool-panel-title">webhook tester</span>
+        <div class="tool-panel-dots">
+          <div class="tool-panel-dot"></div>
+          <div class="tool-panel-dot"></div>
+          <div class="tool-panel-dot active"></div>
+        </div>
+      </div>
+
+      <div class="webhook-url-bar">
+        <span class="webhook-url-label">YOUR URL</span>
+        <span class="webhook-url" id="webhookUrl"></span>
+        <button class="btn btn-secondary" onclick="copyUrl()" style="font-size: 11px; padding: 5px 12px;">COPY</button>
+      </div>
+
+      <div class="webhook-status">
+        <span>
+          <span class="status-dot waiting" id="statusDot"></span>
+          <span class="status-text" id="statusText">Connecting...</span>
+        </span>
+        <span class="status-count" id="requestCount">0 requests</span>
+      </div>
+
+      <div id="requestContainer">
+        <div class="request-empty" id="emptyState">
+          <p>Waiting for requests...</p>
+          <p style="margin-top: 8px; color: var(--text-muted);">Send a request to your URL to see it here. Try this from your terminal:</p>
+          <code id="curlExample"></code>
+        </div>
+        <ul class="request-list" id="requestList" style="display: none;"></ul>
+      </div>
+    </div>
+
+    <div id="introPanel">
+      <div class="tool-panel">
+        <div class="tool-panel-header">
+          <span class="tool-panel-title">webhook tester</span>
+          <div class="tool-panel-dots">
+            <div class="tool-panel-dot"></div>
+            <div class="tool-panel-dot"></div>
+            <div class="tool-panel-dot active"></div>
+          </div>
+        </div>
+        <div style="padding: 2rem 14px; text-align: center;">
+          <p style="color: var(--text-secondary); margin-bottom: 12px;">Get a unique URL. Send requests to it. See them arrive in real time.</p>
+          <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 1.5rem;">Debug webhooks, test API integrations, inspect HTTP requests. No sign-up required.</p>
+          <button class="btn btn-primary" onclick="createEndpoint()" style="font-size: 13px; padding: 10px 28px;">CREATE ENDPOINT</button>
+          <p style="color: var(--text-faint); font-size: 11px; margin-top: 12px;">Endpoints expire after 24 hours. Requests are stored in memory only.</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <span>fast. clean. no clutter.</span>
+    <span>free tools · <a href="https://ko-fi.com/bobrew">buy me a coffee</a></span>
+  </footer>
+
+  <div class="copy-toast" id="copyToast">COPIED</div>
+
+  <script>
+    var currentEndpoint = null;
+    var eventSource = null;
+    var requests = [];
+
+    function createEndpoint() {
+      fetch('/api/webhook/create', { method: 'POST' })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          currentEndpoint = data.id;
+          requests = [];
+
+          document.getElementById('introPanel').style.display = 'none';
+          document.getElementById('mainPanel').style.display = 'block';
+          document.getElementById('btnClear').style.display = '';
+
+          var hookUrl = 'https://tabtools.dev/hook/' + data.id;
+          document.getElementById('webhookUrl').textContent = hookUrl;
+          document.getElementById('curlExample').textContent =
+            'curl -X POST ' + hookUrl + ' \\\n  -H "Content-Type: application/json" \\\n  -d \'{"test": true, "message": "hello from tabtools"}\'';
+
+          document.getElementById('requestList').innerHTML = '';
+          document.getElementById('requestList').style.display = 'none';
+          document.getElementById('emptyState').style.display = '';
+          updateCount();
+
+          connectStream(data.id);
+        })
+        .catch(function(err) {
+          console.error('Failed to create endpoint:', err);
+        });
+    }
+
+    function connectStream(id) {
+      if (eventSource) {
+        eventSource.close();
+      }
+
+      eventSource = new EventSource('/api/webhook/' + id + '/stream');
+
+      eventSource.onopen = function() {
+        document.getElementById('statusDot').className = 'status-dot waiting';
+        document.getElementById('statusText').textContent = 'Listening for requests...';
+      };
+
+      eventSource.onmessage = function(event) {
+        var msg = JSON.parse(event.data);
+
+        if (msg.type === 'connected') {
+          document.getElementById('statusDot').className = 'status-dot connected';
+          document.getElementById('statusText').textContent = 'Connected — listening';
+          return;
+        }
+
+        if (msg.type === 'request') {
+          addRequest(msg.data);
+        }
+      };
+
+      eventSource.onerror = function() {
+        document.getElementById('statusDot').className = 'status-dot disconnected';
+        document.getElementById('statusText').textContent = 'Disconnected — reconnecting...';
+      };
+    }
+
+    function addRequest(req) {
+      requests.unshift(req);
+
+      document.getElementById('emptyState').style.display = 'none';
+      document.getElementById('requestList').style.display = '';
+
+      var list = document.getElementById('requestList');
+      var li = document.createElement('li');
+      li.className = 'request-item';
+      li.setAttribute('data-id', req.id);
+
+      var time = new Date(req.timestamp);
+      var timeStr = time.toLocaleTimeString();
+
+      var bodyPreview = req.body ? (req.body.length > 60 ? req.body.substring(0, 60) + '...' : req.body) : '(empty)';
+
+      var headersHtml = '';
+      if (req.headers) {
+        Object.keys(req.headers).forEach(function(key) {
+          headersHtml += '<div class="header-row"><span class="header-name">' +
+            escapeHtml(key) + ':</span> <span class="header-value">' +
+            escapeHtml(req.headers[key]) + '</span></div>';
+        });
+      }
+
+      var bodyHtml = '';
+      if (req.bodyParsed) {
+        bodyHtml = syntaxHighlight(JSON.stringify(req.bodyParsed, null, 2));
+      } else if (req.body) {
+        bodyHtml = escapeHtml(req.body);
+      } else {
+        bodyHtml = '<span style="color: var(--text-muted);">(empty body)</span>';
+      }
+
+      li.innerHTML =
+        '<div class="request-summary" onclick="toggleRequest(this.parentElement)">' +
+          '<span class="request-method method-' + req.method + '">' + req.method + '</span>' +
+          '<span class="request-time">' + timeStr + '</span>' +
+          '<span class="request-size">' + formatSize(req.size) + '</span>' +
+          '<span class="new-badge">NEW</span>' +
+          '<span class="request-ip">' + (req.ip || '') + '</span>' +
+        '</div>' +
+        '<div class="request-detail">' +
+          '<div class="detail-section">' +
+            '<div class="detail-label">HEADERS</div>' +
+            '<div class="detail-content">' + headersHtml + '</div>' +
+          '</div>' +
+          '<div class="detail-section">' +
+            '<div class="detail-label">BODY</div>' +
+            '<div class="detail-content">' + bodyHtml + '</div>' +
+          '</div>' +
+          '<div style="margin-top: 8px;">' +
+            '<button class="btn btn-secondary" onclick="copyRequestBody(\'' + req.id + '\')" style="font-size: 11px; padding: 4px 12px;">COPY BODY</button>' +
+          '</div>' +
+        '</div>';
+
+      list.insertBefore(li, list.firstChild);
+      updateCount();
+
+      // Flash the status
+      document.getElementById('statusDot').className = 'status-dot connected';
+      document.getElementById('statusText').textContent = 'Request received!';
+      setTimeout(function() {
+        document.getElementById('statusText').textContent = 'Connected — listening';
+      }, 2000);
+    }
+
+    function toggleRequest(item) {
+      item.classList.toggle('expanded');
+    }
+
+    function clearRequests() {
+      requests = [];
+      document.getElementById('requestList').innerHTML = '';
+      document.getElementById('requestList').style.display = 'none';
+      document.getElementById('emptyState').style.display = '';
+      updateCount();
+    }
+
+    function updateCount() {
+      var count = requests.length;
+      document.getElementById('requestCount').textContent = count + ' request' + (count !== 1 ? 's' : '');
+    }
+
+    function copyUrl() {
+      var url = document.getElementById('webhookUrl').textContent;
+      navigator.clipboard.writeText(url).then(function() {
+        showToast();
+      });
+    }
+
+    function copyRequestBody(reqId) {
+      var req = requests.find(function(r) { return r.id === reqId; });
+      if (!req) return;
+      var text = req.bodyParsed ? JSON.stringify(req.bodyParsed, null, 2) : req.body;
+      navigator.clipboard.writeText(text).then(function() {
+        showToast();
+      });
+    }
+
+    function showToast() {
+      var toast = document.getElementById('copyToast');
+      toast.classList.add('show');
+      setTimeout(function() { toast.classList.remove('show'); }, 1500);
+    }
+
+    function formatSize(bytes) {
+      if (!bytes || bytes === 0) return '0 B';
+      if (bytes < 1024) return bytes + ' B';
+      return (bytes / 1024).toFixed(1) + ' KB';
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function syntaxHighlight(json) {
+      json = json
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      return json.replace(
+        /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+        function(match) {
+          var cls = 'number';
+          if (/^"/.test(match)) {
+            if (/:$/.test(match)) {
+              cls = 'key';
+              match = match.replace(/:$/, '');
+              return '<span class="' + cls + '">' + match + '</span>:';
+            } else {
+              cls = 'string';
+            }
+          } else if (/true|false/.test(match)) {
+            cls = 'boolean';
+          } else if (/null/.test(match)) {
+            cls = 'null';
+          }
+          return '<span class="' + cls + '">' + match + '</span>';
+        }
+      );
+    }
+  </script>
+
+</body>
+</html>

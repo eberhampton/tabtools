@@ -1,0 +1,9 @@
+{
+  "name": "tabtools-server",
+  "version": "1.0.0",
+  "description": "TabTools.dev backend server",
+  "main": "webhook-server.js",
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}
