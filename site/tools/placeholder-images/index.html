@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Placeholder Image Generator — TabTools.dev</title>
+  <meta name="description" content="Generate custom placeholder images by size, color, and text. Download as PNG or copy the URL. Free, fast, no sign-up.">
+  <meta property="og:title" content="Placeholder Image Generator — TabTools.dev">
+  <meta property="og:description" content="Create custom placeholder images instantly. Pick size, colors, and text. Download or hotlink.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tabtools.dev/tools/placeholder-images/">
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    .placeholder-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .controls-body {
+      padding: 1.25rem 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .control-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .control-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    .control-input {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      padding: 8px 12px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border-panel);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      outline: none;
+      width: 100%;
+    }
+
+    .control-input:focus {
+      border-color: var(--border-button);
+    }
+
+    .control-input.small {
+      width: 80px;
+    }
+
+    .control-input.medium {
+      width: 140px;
+    }
+
+    .size-separator {
+      font-size: 16px;
+      color: var(--text-muted);
+      padding-bottom: 8px;
+    }
+
+    .color-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .color-swatch {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-panel);
+      cursor: pointer;
+      padding: 0;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .color-swatch::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .color-swatch::-webkit-color-swatch {
+      border: none;
+      border-radius: 2px;
+    }
+
+    .presets-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .preset-btn {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 5px 12px;
+      border-radius: var(--radius);
+      background: var(--btn-secondary-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border-button);
+      cursor: pointer;
+      transition: color 0.1s, border-color 0.1s;
+    }
+
+    .preset-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--text-muted);
+    }
+
+    .preview-area {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem 14px;
+      min-height: 200px;
+    }
+
+    .preview-canvas {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid var(--border-panel);
+      border-radius: var(--radius);
+    }
+
+    .output-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      border-top: 1px solid var(--border-panel);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .copy-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--accent);
+      color: var(--bg-primary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 20px;
+      border-radius: var(--radius);
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .copy-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 640px) {
+      .control-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .control-input.small {
+        width: 100%;
+      }
+
+      .control-input.medium {
+        width: 100%;
+      }
+
+      .size-separator {
+        text-align: center;
+        padding: 0;
+      }
+
+      .tool-actions {
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        flex: 1;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="/" class="site-logo">
+      <div class="logo-dot"></div>
+      <div class="logo-text">
+        <span class="logo-tab">tab</span><span class="logo-tools">tools</span><span class="logo-tld">.dev</span>
+      </div>
+    </a>
+    <nav class="site-nav">
+      <a href="/tools/json-formatter/">JSON</a>
+      <a href="/tools/cron-builder/">CRON</a>
+      <a href="/tools/webhook-tester/">WEBHOOK</a>
+    </nav>
+  </header>
+
+  <main class="site-main">
+
+    <div class="placeholder-layout">
+
+      <div class="tool-panel">
+        <div class="tool-panel-header">
+          <span class="tool-panel-title">placeholder images</span>
+          <div class="tool-panel-dots">
+            <div class="tool-panel-dot"></div>
+            <div class="tool-panel-dot"></div>
+            <div class="tool-panel-dot active"></div>
+          </div>
+        </div>
+
+        <div class="controls-body">
+
+          <div>
+            <div class="control-label" style="margin-bottom: 8px;">SIZE PRESETS</div>
+            <div class="presets-row">
+              <button class="preset-btn" onclick="setSize(150,150)">150x150</button>
+              <button class="preset-btn" onclick="setSize(300,200)">300x200</button>
+              <button class="preset-btn" onclick="setSize(400,300)">400x300</button>
+              <button class="preset-btn" onclick="setSize(600,400)">600x400</button>
+              <button class="preset-btn" onclick="setSize(800,600)">800x600</button>
+              <button class="preset-btn" onclick="setSize(1200,630)">1200x630</button>
+              <button class="preset-btn" onclick="setSize(1920,1080)">1920x1080</button>
+              <button class="preset-btn" onclick="setSize(400,400)">400x400</button>
+              <button class="preset-btn" onclick="setSize(728,90)">728x90</button>
+              <button class="preset-btn" onclick="setSize(160,600)">160x600</button>
+            </div>
+          </div>
+
+          <div class="control-row">
+            <div class="control-group">
+              <span class="control-label">WIDTH</span>
+              <input type="number" class="control-input small" id="inputWidth" value="400" min="1" max="4000" oninput="generate()">
+            </div>
+            <span class="size-separator">×</span>
+            <div class="control-group">
+              <span class="control-label">HEIGHT</span>
+              <input type="number" class="control-input small" id="inputHeight" value="300" min="1" max="4000" oninput="generate()">
+            </div>
+            <div class="control-group">
+              <span class="control-label">BACKGROUND</span>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch" id="inputBg" value="#2a2a2e" oninput="syncBgHex(); generate();">
+                <input type="text" class="control-input medium" id="inputBgHex" value="#2a2a2e" oninput="syncBgSwatch(); generate();">
+              </div>
+            </div>
+            <div class="control-group">
+              <span class="control-label">TEXT</span>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch" id="inputTextColor" value="#888888" oninput="syncTextHex(); generate();">
+                <input type="text" class="control-input medium" id="inputTextHex" value="#888888" oninput="syncTextSwatch(); generate();">
+              </div>
+            </div>
+          </div>
+
+          <div class="control-row">
+            <div class="control-group" style="flex: 1;">
+              <span class="control-label">CUSTOM TEXT (optional — defaults to dimensions)</span>
+              <input type="text" class="control-input" id="inputText" placeholder="400 × 300" oninput="generate()">
+            </div>
+          </div>
+
+        </div>
+
+        <div class="preview-area">
+          <canvas id="canvas" class="preview-canvas"></canvas>
+        </div>
+
+        <div class="output-bar">
+          <span id="outputInfo">400 × 300 · PNG</span>
+          <span id="outputSize"></span>
+        </div>
+      </div>
+
+      <div class="tool-actions">
+        <button class="btn btn-primary" onclick="downloadImage()">DOWNLOAD PNG</button>
+        <button class="btn btn-secondary" onclick="copyDataUrl()">COPY DATA URL</button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <span>fast. clean. no clutter.</span>
+    <span>free tools · <a href="https://ko-fi.com/bobrew">buy me a coffee</a></span>
+  </footer>
+
+  <div class="copy-toast" id="copyToast">COPIED</div>
+
+  <script data-goatcounter="https://tabtools.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+
+  <script>
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+
+    function generate() {
+      var w = parseInt(document.getElementById('inputWidth').value) || 400;
+      var h = parseInt(document.getElementById('inputHeight').value) || 300;
+      var bg = document.getElementById('inputBgHex').value || '#2a2a2e';
+      var textColor = document.getElementById('inputTextHex').value || '#888888';
+      var customText = document.getElementById('inputText').value;
+
+      w = Math.max(1, Math.min(4000, w));
+      h = Math.max(1, Math.min(4000, h));
+
+      canvas.width = w;
+      canvas.height = h;
+
+      // Limit display size
+      var maxDisplay = 600;
+      if (w > maxDisplay) {
+        canvas.style.width = maxDisplay + 'px';
+        canvas.style.height = Math.round(h * (maxDisplay / w)) + 'px';
+      } else {
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+      }
+
+      // Background
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+
+      // Cross lines
+      ctx.strokeStyle = textColor;
+      ctx.globalAlpha = 0.15;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(w, h);
+      ctx.moveTo(w, 0);
+      ctx.lineTo(0, h);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+
+      // Text
+      var displayText = customText || (w + ' × ' + h);
+      var fontSize = Math.max(12, Math.min(72, Math.floor(Math.min(w, h) / 8)));
+      ctx.font = fontSize + 'px Courier New, monospace';
+      ctx.fillStyle = textColor;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(displayText, w / 2, h / 2);
+
+      // Info
+      document.getElementById('outputInfo').textContent = w + ' × ' + h + ' · PNG';
+
+      // Estimate file size
+      canvas.toBlob(function(blob) {
+        if (blob) {
+          var kb = (blob.size / 1024).toFixed(1);
+          document.getElementById('outputSize').textContent = kb + ' KB';
+        }
+      });
+    }
+
+    function setSize(w, h) {
+      document.getElementById('inputWidth').value = w;
+      document.getElementById('inputHeight').value = h;
+      generate();
+    }
+
+    function syncBgHex() {
+      document.getElementById('inputBgHex').value = document.getElementById('inputBg').value;
+    }
+
+    function syncBgSwatch() {
+      var val = document.getElementById('inputBgHex').value;
+      if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+        document.getElementById('inputBg').value = val;
+      }
+    }
+
+    function syncTextHex() {
+      document.getElementById('inputTextHex').value = document.getElementById('inputTextColor').value;
+    }
+
+    function syncTextSwatch() {
+      var val = document.getElementById('inputTextHex').value;
+      if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+        document.getElementById('inputTextColor').value = val;
+      }
+    }
+
+    function downloadImage() {
+      var w = document.getElementById('inputWidth').value || 400;
+      var h = document.getElementById('inputHeight').value || 300;
+      var link = document.createElement('a');
+      link.download = 'placeholder-' + w + 'x' + h + '.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    function copyDataUrl() {
+      var dataUrl = canvas.toDataURL('image/png');
+      navigator.clipboard.writeText(dataUrl).then(function() {
+        var toast = document.getElementById('copyToast');
+        toast.classList.add('show');
+        setTimeout(function() { toast.classList.remove('show'); }, 1500);
+      });
+    }
+
+    generate();
+  </script>
+
+</body>
+</html>
