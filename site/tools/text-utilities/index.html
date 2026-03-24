@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Utilities — Word Counter, Case Converter & More — TabTools.dev</title>
+  <meta name="description" content="Free text tools: word counter, character counter, case converter, line counter, text reverser, whitespace remover, and more. No sign-up required.">
+  <meta property="og:title" content="Text Utilities — TabTools.dev">
+  <meta property="og:description" content="Word counter, case converter, character counter, and more. Free text tools for developers and writers.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tabtools.dev/tools/text-utilities/">
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    .text-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .stats-bar {
+      display: flex;
+      gap: 16px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-panel);
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .stat-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .tool-textarea {
+      min-height: 220px;
+    }
+
+    .transforms-section {
+      padding: 14px;
+      border-top: 1px solid var(--border-panel);
+    }
+
+    .transforms-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .transforms-grid {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .transform-btn {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 6px 14px;
+      border-radius: var(--radius);
+      background: var(--btn-secondary-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border-button);
+      cursor: pointer;
+      transition: color 0.1s, border-color 0.1s;
+    }
+
+    .transform-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--text-muted);
+    }
+
+    .output-section {
+      display: none;
+    }
+
+    .output-section.visible {
+      display: block;
+    }
+
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-panel);
+    }
+
+    .output-title {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .output-body {
+      padding: 14px;
+      font-size: 13px;
+      color: var(--text-primary);
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 80px;
+      max-height: 300px;
+      overflow: auto;
+    }
+
+    .reading-time {
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-top: 1px solid var(--border-panel);
+    }
+
+    .reading-time span {
+      color: var(--text-primary);
+    }
+
+    .copy-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--accent);
+      color: var(--bg-primary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 20px;
+      border-radius: var(--radius);
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .copy-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .find-replace {
+      padding: 14px;
+      border-top: 1px solid var(--border-panel);
+    }
+
+    .find-replace-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .find-replace-input {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 6px 10px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border-panel);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      outline: none;
+      width: 160px;
+    }
+
+    .find-replace-input:focus {
+      border-color: var(--border-button);
+    }
+
+    .find-replace-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .fr-arrow {
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 640px) {
+      .stats-bar {
+        gap: 12px;
+      }
+
+      .find-replace-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .find-replace-input {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="/" class="site-logo">
+      <div class="logo-dot"></div>
+      <div class="logo-text">
+        <span class="logo-tab">tab</span><span class="logo-tools">tools</span><span class="logo-tld">.dev</span>
+      </div>
+    </a>
+    <nav class="site-nav">
+      <a href="/tools/json-formatter/">JSON</a>
+      <a href="/tools/cron-builder/">CRON</a>
+      <a href="/tools/webhook-tester/">WEBHOOK</a>
+    </nav>
+  </header>
+
+  <main class="site-main">
+
+    <div class="text-layout">
+
+      <div class="tool-panel">
+        <div class="tool-panel-header">
+          <span class="tool-panel-title">text utilities</span>
+          <div class="tool-panel-dots">
+            <div class="tool-panel-dot"></div>
+            <div class="tool-panel-dot"></div>
+            <div class="tool-panel-dot active"></div>
+          </div>
+        </div>
+
+        <div class="stats-bar" id="statsBar">
+          <div class="stat">
+            <span class="stat-value" id="statWords">0</span>
+            <span class="stat-label">words</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="statChars">0</span>
+            <span class="stat-label">characters</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="statCharsNoSpace">0</span>
+            <span class="stat-label">no spaces</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="statLines">0</span>
+            <span class="stat-label">lines</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="statSentences">0</span>
+            <span class="stat-label">sentences</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="statParagraphs">0</span>
+            <span class="stat-label">paragraphs</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="statBytes">0</span>
+            <span class="stat-label">bytes</span>
+          </div>
+        </div>
+
+        <div class="tool-panel-body">
+          <textarea
+            id="textInput"
+            class="tool-textarea"
+            placeholder="$ type or paste your text here..."
+            spellcheck="false"
+            oninput="analyze()"
+          ></textarea>
+        </div>
+
+        <div class="reading-time" id="readingTime">
+          Reading time: <span>0 sec</span>
+        </div>
+
+        <div class="transforms-section">
+          <div class="transforms-label">TRANSFORM</div>
+          <div class="transforms-grid">
+            <button class="transform-btn" onclick="transform('upper')">UPPERCASE</button>
+            <button class="transform-btn" onclick="transform('lower')">lowercase</button>
+            <button class="transform-btn" onclick="transform('title')">Title Case</button>
+            <button class="transform-btn" onclick="transform('sentence')">Sentence case</button>
+            <button class="transform-btn" onclick="transform('reverse')">esreveR</button>
+            <button class="transform-btn" onclick="transform('trim')">Trim whitespace</button>
+            <button class="transform-btn" onclick="transform('dedupe-lines')">Dedupe lines</button>
+            <button class="transform-btn" onclick="transform('sort-lines')">Sort lines</button>
+            <button class="transform-btn" onclick="transform('remove-empty')">Remove empty lines</button>
+            <button class="transform-btn" onclick="transform('number-lines')">Number lines</button>
+            <button class="transform-btn" onclick="transform('slug')">to-slug</button>
+            <button class="transform-btn" onclick="transform('encode-uri')">URL encode</button>
+            <button class="transform-btn" onclick="transform('decode-uri')">URL decode</button>
+            <button class="transform-btn" onclick="transform('encode-base64')">Base64 encode</button>
+            <button class="transform-btn" onclick="transform('decode-base64')">Base64 decode</button>
+            <button class="transform-btn" onclick="transform('escape-html')">Escape HTML</button>
+            <button class="transform-btn" onclick="transform('unescape-html')">Unescape HTML</button>
+          </div>
+        </div>
+
+        <div class="find-replace">
+          <div class="transforms-label">FIND & REPLACE</div>
+          <div class="find-replace-row">
+            <input type="text" class="find-replace-input" id="findInput" placeholder="find...">
+            <span class="fr-arrow">→</span>
+            <input type="text" class="find-replace-input" id="replaceInput" placeholder="replace with...">
+            <button class="transform-btn" onclick="findReplace()">REPLACE ALL</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-actions">
+        <button class="btn btn-primary" onclick="copyText()">COPY TEXT</button>
+        <button class="btn btn-secondary" onclick="clearText()">CLEAR</button>
+      </div>
+
+      <div class="tool-panel output-section" id="outputSection">
+        <div class="output-header">
+          <span class="output-title" id="outputTitle">transformed output</span>
+          <button class="btn btn-secondary" onclick="copyOutput()" style="font-size: 11px; padding: 4px 12px;">COPY</button>
+        </div>
+        <div class="output-body" id="outputBody"></div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <span>fast. clean. no clutter.</span>
+    <span>free tools · <a href="https://ko-fi.com/bobrew">buy me a coffee</a></span>
+  </footer>
+
+  <div class="copy-toast" id="copyToast">COPIED</div>
+
+  <script data-goatcounter="https://tabtools.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+
+  <script>
+    var input = document.getElementById('textInput');
+    var lastOutput = '';
+
+    function analyze() {
+      var text = input.value;
+
+      var words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+      var chars = text.length;
+      var charsNoSpace = text.replace(/\s/g, '').length;
+      var lines = text === '' ? 0 : text.split('\n').length;
+      var sentences = text === '' ? 0 : (text.match(/[.!?]+(\s|$)/g) || []).length;
+      var paragraphs = text === '' ? 0 : text.split(/\n\s*\n/).filter(function(p) { return p.trim() !== ''; }).length;
+      var bytes = new Blob([text]).size;
+
+      document.getElementById('statWords').textContent = words;
+      document.getElementById('statChars').textContent = chars;
+      document.getElementById('statCharsNoSpace').textContent = charsNoSpace;
+      document.getElementById('statLines').textContent = lines;
+      document.getElementById('statSentences').textContent = sentences;
+      document.getElementById('statParagraphs').textContent = paragraphs || (text.trim() ? 1 : 0);
+      document.getElementById('statBytes').textContent = bytes;
+
+      var wpm = 225;
+      var minutes = words / wpm;
+      var readStr = '';
+      if (minutes < 1) {
+        readStr = Math.ceil(minutes * 60) + ' sec';
+      } else if (minutes < 60) {
+        readStr = Math.floor(minutes) + ' min ' + Math.round((minutes % 1) * 60) + ' sec';
+      } else {
+        readStr = Math.floor(minutes / 60) + ' hr ' + Math.round(minutes % 60) + ' min';
+      }
+      document.getElementById('readingTime').innerHTML = 'Reading time: <span>' + readStr + '</span>';
+    }
+
+    function transform(type) {
+      var text = input.value;
+      if (!text) return;
+      var result = '';
+
+      switch (type) {
+        case 'upper':
+          result = text.toUpperCase();
+          break;
+        case 'lower':
+          result = text.toLowerCase();
+          break;
+        case 'title':
+          result = text.replace(/\w\S*/g, function(t) {
+            return t.charAt(0).toUpperCase() + t.substr(1).toLowerCase();
+          });
+          break;
+        case 'sentence':
+          result = text.toLowerCase().replace(/(^\w|[.!?]\s+\w)/g, function(c) {
+            return c.toUpperCase();
+          });
+          break;
+        case 'reverse':
+          result = text.split('').reverse().join('');
+          break;
+        case 'trim':
+          result = text.split('\n').map(function(line) {
+            return line.trim();
+          }).join('\n').replace(/\n{3,}/g, '\n\n').trim();
+          break;
+        case 'dedupe-lines':
+          var seen = {};
+          result = text.split('\n').filter(function(line) {
+            if (seen[line]) return false;
+            seen[line] = true;
+            return true;
+          }).join('\n');
+          break;
+        case 'sort-lines':
+          result = text.split('\n').sort(function(a, b) {
+            return a.localeCompare(b, undefined, { sensitivity: 'base' });
+          }).join('\n');
+          break;
+        case 'remove-empty':
+          result = text.split('\n').filter(function(line) {
+            return line.trim() !== '';
+          }).join('\n');
+          break;
+        case 'number-lines':
+          result = text.split('\n').map(function(line, i) {
+            return (i + 1) + '  ' + line;
+          }).join('\n');
+          break;
+        case 'slug':
+          result = text.toLowerCase()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim();
+          break;
+        case 'encode-uri':
+          result = encodeURIComponent(text);
+          break;
+        case 'decode-uri':
+          try { result = decodeURIComponent(text); }
+          catch (e) { result = 'Error: invalid encoded text'; }
+          break;
+        case 'encode-base64':
+          try { result = btoa(unescape(encodeURIComponent(text))); }
+          catch (e) { result = 'Error: could not encode'; }
+          break;
+        case 'decode-base64':
+          try { result = decodeURIComponent(escape(atob(text.trim()))); }
+          catch (e) { result = 'Error: invalid base64'; }
+          break;
+        case 'escape-html':
+          result = text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+          break;
+        case 'unescape-html':
+          var el = document.createElement('textarea');
+          el.innerHTML = text;
+          result = el.value;
+          break;
+      }
+
+      lastOutput = result;
+      input.value = result;
+      analyze();
+    }
+
+    function findReplace() {
+      var find = document.getElementById('findInput').value;
+      var replace = document.getElementById('replaceInput').value;
+      if (!find) return;
+
+      var escaped = find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      var regex = new RegExp(escaped, 'g');
+      input.value = input.value.replace(regex, replace);
+      analyze();
+    }
+
+    function copyText() {
+      navigator.clipboard.writeText(input.value).then(function() {
+        showToast();
+      });
+    }
+
+    function copyOutput() {
+      navigator.clipboard.writeText(lastOutput).then(function() {
+        showToast();
+      });
+    }
+
+    function clearText() {
+      input.value = '';
+      analyze();
+    }
+
+    function showToast() {
+      var toast = document.getElementById('copyToast');
+      toast.classList.add('show');
+      setTimeout(function() { toast.classList.remove('show'); }, 1500);
+    }
+
+    input.addEventListener('paste', function() {
+      setTimeout(analyze, 50);
+    });
+
+    analyze();
+  </script>
+
+</body>
+</html>
