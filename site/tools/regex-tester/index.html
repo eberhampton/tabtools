@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regex Tester & Debugger — TabTools.dev</title>
+  <meta name="description" content="Test regular expressions in real time. See matches highlighted, capture groups extracted, and plain English explanations. Free, no sign-up.">
+  <meta property="og:title" content="Regex Tester & Debugger — TabTools.dev">
+  <meta property="og:description" content="Test and debug regular expressions live. See matches, groups, and explanations instantly.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tabtools.dev/tools/regex-tester/">
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    .regex-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .pattern-bar {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 0 14px;
+      border-bottom: 1px solid var(--border-panel);
+    }
+
+    .pattern-slash {
+      font-size: 20px;
+      color: var(--accent);
+      font-weight: 700;
+      padding: 12px 0;
+    }
+
+    .pattern-input {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      padding: 12px 6px;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      outline: none;
+      flex: 1;
+      min-width: 100px;
+    }
+
+    .pattern-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .flags-input {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      padding: 12px 6px;
+      background: transparent;
+      border: none;
+      color: var(--json-string);
+      outline: none;
+      width: 50px;
+    }
+
+    .flags-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .flags-bar {
+      display: flex;
+      gap: 8px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-panel);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .flags-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      margin-right: 4px;
+    }
+
+    .flag-btn {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: var(--radius);
+      background: var(--btn-secondary-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border-button);
+      cursor: pointer;
+      transition: color 0.1s, border-color 0.1s;
+    }
+
+    .flag-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--text-muted);
+    }
+
+    .flag-btn.active {
+      background: var(--btn-primary-bg);
+      color: var(--btn-primary-text);
+      border-color: var(--btn-primary-bg);
+      font-weight: 700;
+    }
+
+    .flag-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+
+    .test-body {
+      padding: 14px;
+      min-height: 150px;
+    }
+
+    .test-textarea {
+      width: 100%;
+      min-height: 150px;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.7;
+      resize: vertical;
+      outline: none;
+    }
+
+    .test-textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .highlight-area {
+      padding: 14px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 80px;
+      color: var(--text-primary);
+    }
+
+    .highlight-area .match {
+      background: #6ee7b725;
+      border-bottom: 2px solid var(--accent);
+      padding: 1px 0;
+    }
+
+    .highlight-area .group1 {
+      background: #818cf825;
+      border-bottom: 2px solid #818cf8;
+    }
+
+    .highlight-area .group2 {
+      background: #fbbf2425;
+      border-bottom: 2px solid #fbbf24;
+    }
+
+    .highlight-area .group3 {
+      background: #f8717125;
+      border-bottom: 2px solid #f87171;
+    }
+
+    .match-stats {
+      display: flex;
+      gap: 16px;
+      padding: 10px 14px;
+      border-top: 1px solid var(--border-panel);
+      font-size: 12px;
+      flex-wrap: wrap;
+    }
+
+    .match-stat-label {
+      color: var(--text-muted);
+    }
+
+    .match-stat-value {
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+
+    .matches-section {
+      padding: 14px;
+      border-top: 1px solid var(--border-panel);
+      display: none;
+    }
+
+    .matches-section.visible {
+      display: block;
+    }
+
+    .matches-title {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .match-item {
+      display: flex;
+      gap: 12px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border-panel);
+      font-size: 12px;
+      align-items: baseline;
+    }
+
+    .match-item:last-child {
+      border-bottom: none;
+    }
+
+    .match-index {
+      color: var(--text-muted);
+      min-width: 24px;
+    }
+
+    .match-text {
+      color: var(--accent);
+      font-weight: 700;
+      word-break: break-all;
+    }
+
+    .match-groups {
+      color: var(--text-secondary);
+    }
+
+    .match-pos {
+      color: var(--text-muted);
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    .error-msg {
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #f87171;
+      border-top: 1px solid var(--border-panel);
+      display: none;
+    }
+
+    .error-msg.visible {
+      display: block;
+    }
+
+    .presets-section {
+      padding: 14px;
+      border-top: 1px solid var(--border-panel);
+    }
+
+    .presets-title {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .presets-grid {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .preset-btn {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 5px 12px;
+      border-radius: var(--radius);
+      background: var(--btn-secondary-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border-button);
+      cursor: pointer;
+      transition: color 0.1s, border-color 0.1s;
+    }
+
+    .preset-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--text-muted);
+    }
+
+    .copy-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--accent);
+      color: var(--bg-primary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 20px;
+      border-radius: var(--radius);
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .copy-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 640px) {
+      .flag-desc {
+        display: none;
+      }
+
+      .match-pos {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="/" class="site-logo">
+      <div class="logo-dot"></div>
+      <div class="logo-text">
+        <span class="logo-tab">tab</span><span class="logo-tools">tools</span><span class="logo-tld">.dev</span>
+      </div>
+    </a>
+    <nav class="site-nav">
+      <a href="/tools/json-formatter/">JSON</a>
+      <a href="/tools/cron-builder/">CRON</a>
+      <a href="/tools/webhook-tester/">WEBHOOK</a>
+    </nav>
+  </header>
+
+  <main class="site-main">
+
+    <div class="regex-layout">
+
+      <div class="tool-panel">
+        <div class="tool-panel-header">
+          <span class="tool-panel-title">regex tester</span>
+          <div class="tool-panel-dots">
+            <div class="tool-panel-dot"></div>
+            <div class="tool-panel-dot"></div>
+            <div class="tool-panel-dot active"></div>
+          </div>
+        </div>
+
+        <div class="pattern-bar">
+          <span class="pattern-slash">/</span>
+          <input type="text" class="pattern-input" id="patternInput" placeholder="enter regex pattern..." oninput="test()" spellcheck="false">
+          <span class="pattern-slash">/</span>
+          <input type="text" class="flags-input" id="flagsInput" value="g" placeholder="g" oninput="test()" spellcheck="false">
+        </div>
+
+        <div class="flags-bar">
+          <span class="flags-label">FLAGS</span>
+          <button class="flag-btn active" data-flag="g" onclick="toggleFlag(this)">g</button>
+          <button class="flag-btn" data-flag="i" onclick="toggleFlag(this)">i</button>
+          <button class="flag-btn" data-flag="m" onclick="toggleFlag(this)">m</button>
+          <button class="flag-btn" data-flag="s" onclick="toggleFlag(this)">s</button>
+          <span class="flag-desc" id="flagDesc">g = global (find all matches)</span>
+        </div>
+
+        <div class="presets-section">
+          <div class="presets-title">COMMON PATTERNS</div>
+          <div class="presets-grid">
+            <button class="preset-btn" onclick="applyPreset('[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}', 'g')">email</button>
+            <button class="preset-btn" onclick="applyPreset('https?://[^\\s]+', 'g')">URL</button>
+            <button class="preset-btn" onclick="applyPreset('\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b', 'g')">IP address</button>
+            <button class="preset-btn" onclick="applyPreset('\\b\\d{3}[-.]?\\d{3}[-.]?\\d{4}\\b', 'g')">phone (US)</button>
+            <button class="preset-btn" onclick="applyPreset('#([0-9a-fA-F]{3}){1,2}\\b', 'g')">hex color</button>
+            <button class="preset-btn" onclick="applyPreset('\\d{4}-\\d{2}-\\d{2}', 'g')">date YYYY-MM-DD</button>
+            <button class="preset-btn" onclick="applyPreset('<[^>]+>', 'g')">HTML tags</button>
+            <button class="preset-btn" onclick="applyPreset('\\b[A-Z][a-z]+\\b', 'g')">capitalized words</button>
+            <button class="preset-btn" onclick="applyPreset('^\\s*$', 'gm')">empty lines</button>
+            <button class="preset-btn" onclick="applyPreset('\\b\\w+\\b', 'g')">all words</button>
+          </div>
+        </div>
+
+        <div class="test-body">
+          <textarea
+            id="testInput"
+            class="test-textarea"
+            placeholder="$ paste test text here..."
+            spellcheck="false"
+            oninput="test()"
+          >The quick brown fox jumps over the lazy dog.
+Contact us at support@tabtools.dev or sales@example.com
+Visit https://tabtools.dev for free developer tools.
+Server IP: 146.190.133.14
+Phone: 555-867-5309
+Colors: #6ee7b7, #fbbf24, #818cf8
+Date: 2026-03-23</textarea>
+        </div>
+
+        <div class="error-msg" id="errorMsg"></div>
+
+        <div class="highlight-area" id="highlightArea"></div>
+
+        <div class="match-stats" id="matchStats">
+          <span><span class="match-stat-label">matches: </span><span class="match-stat-value" id="matchCount">0</span></span>
+          <span><span class="match-stat-label">groups: </span><span class="match-stat-value" id="groupCount">0</span></span>
+        </div>
+
+        <div class="matches-section" id="matchesSection">
+          <div class="matches-title">MATCH DETAILS</div>
+          <div id="matchList"></div>
+        </div>
+      </div>
+
+      <div class="tool-actions">
+        <button class="btn btn-primary" onclick="copyPattern()">COPY REGEX</button>
+        <button class="btn btn-secondary" onclick="copyMatches()">COPY MATCHES</button>
+        <button class="btn btn-secondary" onclick="clearAll()">CLEAR</button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <span>fast. clean. no clutter.</span>
+    <span>free tools · <a href="https://ko-fi.com/bobrew">buy me a coffee</a></span>
+  </footer>
+
+  <div class="copy-toast" id="copyToast">COPIED</div>
+
+  <script data-goatcounter="https://tabtools.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+
+  <script>
+    var patternInput = document.getElementById('patternInput');
+    var flagsInput = document.getElementById('flagsInput');
+    var testInput = document.getElementById('testInput');
+    var highlightArea = document.getElementById('highlightArea');
+    var errorMsg = document.getElementById('errorMsg');
+    var matchesSection = document.getElementById('matchesSection');
+    var matchList = document.getElementById('matchList');
+    var allMatches = [];
+
+    var flagDescriptions = {
+      'g': 'g = global (find all matches)',
+      'i': 'i = case insensitive',
+      'm': 'm = multiline (^ and $ match line boundaries)',
+      's': 's = dotAll (. matches newlines)'
+    };
+
+    function toggleFlag(btn) {
+      btn.classList.toggle('active');
+      var flags = '';
+      document.querySelectorAll('.flag-btn.active').forEach(function(b) {
+        flags += b.getAttribute('data-flag');
+      });
+      flagsInput.value = flags;
+
+      var flag = btn.getAttribute('data-flag');
+      if (btn.classList.contains('active')) {
+        document.getElementById('flagDesc').textContent = flagDescriptions[flag];
+      }
+
+      test();
+    }
+
+    function syncFlagButtons() {
+      var flags = flagsInput.value;
+      document.querySelectorAll('.flag-btn').forEach(function(btn) {
+        var f = btn.getAttribute('data-flag');
+        if (flags.indexOf(f) > -1) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    }
+
+    function applyPreset(pattern, flags) {
+      patternInput.value = pattern;
+      flagsInput.value = flags;
+      syncFlagButtons();
+      test();
+    }
+
+    function test() {
+      var pattern = patternInput.value;
+      var flags = flagsInput.value;
+      var text = testInput.value;
+
+      errorMsg.classList.remove('visible');
+      allMatches = [];
+
+      if (!pattern) {
+        highlightArea.textContent = text;
+        document.getElementById('matchCount').textContent = '0';
+        document.getElementById('groupCount').textContent = '0';
+        matchesSection.classList.remove('visible');
+        return;
+      }
+
+      var regex;
+      try {
+        regex = new RegExp(pattern, flags);
+      } catch (e) {
+        errorMsg.textContent = e.message;
+        errorMsg.classList.add('visible');
+        highlightArea.textContent = text;
+        document.getElementById('matchCount').textContent = '0';
+        document.getElementById('groupCount').textContent = '0';
+        matchesSection.classList.remove('visible');
+        return;
+      }
+
+      var matches = [];
+      var match;
+      var maxGroups = 0;
+      var safety = 0;
+
+      if (flags.indexOf('g') > -1) {
+        while ((match = regex.exec(text)) !== null && safety < 10000) {
+          matches.push({
+            text: match[0],
+            index: match.index,
+            groups: match.slice(1)
+          });
+          if (match[0].length === 0) {
+            regex.lastIndex++;
+          }
+          if (match.length - 1 > maxGroups) maxGroups = match.length - 1;
+          safety++;
+        }
+      } else {
+        match = regex.exec(text);
+        if (match) {
+          matches.push({
+            text: match[0],
+            index: match.index,
+            groups: match.slice(1)
+          });
+          if (match.length - 1 > maxGroups) maxGroups = match.length - 1;
+        }
+      }
+
+      allMatches = matches;
+
+      document.getElementById('matchCount').textContent = matches.length;
+      document.getElementById('groupCount').textContent = maxGroups;
+
+      // Build highlighted text
+      var html = '';
+      var lastIndex = 0;
+
+      matches.forEach(function(m) {
+        html += escapeHtml(text.substring(lastIndex, m.index));
+        html += '<span class="match">' + escapeHtml(m.text) + '</span>';
+        lastIndex = m.index + m.text.length;
+      });
+      html += escapeHtml(text.substring(lastIndex));
+
+      highlightArea.innerHTML = html;
+
+      // Build match list
+      if (matches.length > 0) {
+        matchesSection.classList.add('visible');
+        var listHtml = '';
+        matches.forEach(function(m, i) {
+          var groupStr = '';
+          if (m.groups.length > 0) {
+            var groupParts = [];
+            m.groups.forEach(function(g, gi) {
+              if (g !== undefined) {
+                var cls = 'group' + Math.min(gi + 1, 3);
+                groupParts.push('$' + (gi + 1) + '=<span class="' + cls + '" style="font-weight:700;">' + escapeHtml(g) + '</span>');
+              }
+            });
+            if (groupParts.length > 0) {
+              groupStr = '<span class="match-groups"> · ' + groupParts.join(' · ') + '</span>';
+            }
+          }
+          listHtml += '<div class="match-item">' +
+            '<span class="match-index">' + (i + 1) + '</span>' +
+            '<span class="match-text">' + escapeHtml(m.text) + '</span>' +
+            groupStr +
+            '<span class="match-pos">pos ' + m.index + '</span>' +
+          '</div>';
+        });
+        matchList.innerHTML = listHtml;
+      } else {
+        matchesSection.classList.remove('visible');
+      }
+    }
+
+    function copyPattern() {
+      var pattern = patternInput.value;
+      var flags = flagsInput.value;
+      var str = '/' + pattern + '/' + flags;
+      navigator.clipboard.writeText(str).then(function() {
+        showToast();
+      });
+    }
+
+    function copyMatches() {
+      if (allMatches.length === 0) return;
+      var text = allMatches.map(function(m) { return m.text; }).join('\n');
+      navigator.clipboard.writeText(text).then(function() {
+        showToast();
+      });
+    }
+
+    function clearAll() {
+      patternInput.value = '';
+      testInput.value = '';
+      highlightArea.textContent = '';
+      matchesSection.classList.remove('visible');
+      errorMsg.classList.remove('visible');
+      document.getElementById('matchCount').textContent = '0';
+      document.getElementById('groupCount').textContent = '0';
+      allMatches = [];
+    }
+
+    function showToast() {
+      var toast = document.getElementById('copyToast');
+      toast.classList.add('show');
+      setTimeout(function() { toast.classList.remove('show'); }, 1500);
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    flagsInput.addEventListener('input', function() {
+      syncFlagButtons();
+    });
+
+    test();
+  </script>
+
+</body>
+</html>
