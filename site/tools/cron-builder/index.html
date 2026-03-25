@@ -257,12 +257,15 @@
         <span class="logo-tab">tab</span><span class="logo-tools">tools</span><span class="logo-tld">.dev</span>
       </div>
     </a>
-    <nav class="site-nav">
-      <a href="/tools/json-formatter/">JSON</a>
-      <a href="/tools/cron-builder/" class="active">CRON</a>
-      <a href="/tools/webhook-tester/">WEBHOOK</a>
-    </nav>
   </header>
+
+   <nav class="site-nav">
+     <a href="/tools/json-formatter/">JSON</a>
+     <a href="/tools/cron-builder/">CRON</a>
+     <a href="/tools/webhook-tester/">WEBHOOK</a>
+     <a href="/">ALL</a>
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">LIGHT</button>
+    </nav>
 
   <main class="site-main">
 
@@ -730,6 +733,23 @@
 
     init();
   </script>
+  <script>
+  function toggleTheme() {
+    var current = document.documentElement.getAttribute('data-theme');
+    var next = current === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next === 'dark' ? '' : next);
+    localStorage.setItem('tabtools-theme', next);
+    document.getElementById('themeBtn').textContent = next === 'light' ? 'DARK' : 'LIGHT';
+  }
+  (function() {
+    var saved = localStorage.getItem('tabtools-theme');
+    if (saved === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      var btn = document.getElementById('themeBtn');
+      if (btn) btn.textContent = 'DARK';
+    }
+  })();
+</script>
 
  <script data-goatcounter="https://tabtools.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
