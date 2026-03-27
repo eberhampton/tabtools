@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Converter — Hex to RGB, HSL & CSS — TabTools.dev</title>
+  <meta name="description" content="Convert colors between hex, RGB, and HSL. See contrast ratios, preview swatches, and copy CSS output. Free, fast, no sign-up.">
+  <meta property="og:title" content="Color Converter — TabTools.dev">
+  <meta property="og:description" content="Convert hex to RGB, HSL, and CSS. Preview colors and check contrast ratios instantly.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tabtools.dev/tools/color-converter/">
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    .color-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .color-input-bar {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      padding: 14px;
+      border-bottom: 1px solid var(--border-panel);
+      flex-wrap: wrap;
+    }
+
+    .color-swatch-large {
+      width: 60px;
+      height: 60px;
+      border-radius: var(--radius-panel);
+      border: 1px solid var(--border-panel);
+      cursor: pointer;
+      padding: 0;
+      -webkit-appearance: none;
+      appearance: none;
+      flex-shrink: 0;
+    }
+
+    .color-swatch-large::-webkit-color-swatch-wrapper { padding: 0; }
+    .color-swatch-large::-webkit-color-swatch { border: none; border-radius: 3px; }
+
+    .color-text-input {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      padding: 10px 14px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border-panel);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      outline: none;
+      width: 200px;
+    }
+
+    .color-text-input:focus {
+      border-color: var(--border-button);
+    }
+
+    .color-text-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .formats-body {
+      padding: 14px;
+    }
+
+    .format-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .format-row:last-child {
+      border-bottom: none;
+    }
+
+    .format-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      min-width: 50px;
+    }
+
+    .format-value {
+      font-size: 14px;
+      color: var(--text-primary);
+      flex: 1;
+      word-break: break-all;
+    }
+
+    .format-copy {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 4px 10px;
+      border-radius: var(--radius);
+      background: var(--btn-secondary-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border-button);
+      cursor: pointer;
+      transition: color 0.1s;
+    }
+
+    .format-copy:hover {
+      color: var(--text-primary);
+    }
+
+    .preview-section {
+      padding: 14px;
+      border-top: 1px solid var(--border-panel);
+    }
+
+    .preview-title {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .preview-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .preview-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .preview-swatch {
+      width: 100%;
+      height: 48px;
+      border-radius: var(--radius-panel);
+      border: 1px solid var(--border-panel);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .contrast-section {
+      padding: 14px;
+      border-top: 1px solid var(--border-panel);
+    }
+
+    .contrast-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .contrast-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      min-width: 80px;
+    }
+
+    .contrast-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .contrast-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: var(--radius);
+      font-weight: 700;
+    }
+
+    .badge-pass {
+      background: #6ee7b715;
+      color: var(--accent);
+    }
+
+    .badge-fail {
+      background: #f8717115;
+      color: #f87171;
+    }
+
+    .contrast-input-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .contrast-bg-input {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      padding: 6px 10px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border-panel);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      outline: none;
+      width: 120px;
+    }
+
+    .contrast-bg-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .contrast-bg-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-panel);
+      cursor: pointer;
+      padding: 0;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .contrast-bg-swatch::-webkit-color-swatch-wrapper { padding: 0; }
+    .contrast-bg-swatch::-webkit-color-swatch { border: none; border-radius: 2px; }
+
+    .presets-section {
+      padding: 14px;
+      border-top: 1px solid var(--border-panel);
+    }
+
+    .presets-title {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .presets-grid {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .color-preset {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-panel);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .color-preset:hover {
+      transform: scale(1.15);
+    }
+
+    .copy-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--accent);
+      color: var(--bg-primary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 20px;
+      border-radius: var(--radius);
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .copy-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 640px) {
+      .color-input-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .color-swatch-large {
+        width: 100%;
+        height: 48px;
+      }
+
+      .color-text-input {
+        width: 100%;
+      }
+
+      .contrast-input-row {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="/" class="site-logo">
+      <div class="logo-dot"></div>
+      <div class="logo-text">
+        <span class="logo-tab">tab</span><span class="logo-tools">tools</span><span class="logo-tld">.dev</span>
+      </div>
+    </a>
+    <nav class="site-nav">
+      <a href="/tools/json-formatter/">JSON</a>
+      <a href="/tools/cron-builder/">CRON</a>
+      <a href="/tools/webhook-tester/">WEBHOOK</a>
+      <a href="/">ALL</a>
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">LIGHT</button>
+    </nav>
+  </header>
+
+  <main class="site-main">
+
+    <div class="color-layout">
+
+      <div class="tool-panel">
+        <div class="tool-panel-header">
+          <span class="tool-panel-title">color converter</span>
+          <div class="tool-panel-dots">
+            <div class="tool-panel-dot"></div>
+            <div class="tool-panel-dot"></div>
+            <div class="tool-panel-dot active"></div>
+          </div>
+        </div>
+
+        <div class="color-input-bar">
+          <input type="color" class="color-swatch-large" id="colorPicker" value="#6ee7b7" oninput="fromPicker()">
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <span style="font-size:11px;color:var(--text-muted);letter-spacing:1px;">ENTER COLOR</span>
+            <input type="text" class="color-text-input" id="colorInput" value="#6ee7b7" placeholder="#hex, rgb(), or hsl()" oninput="fromText()" spellcheck="false">
+          </div>
+        </div>
+
+        <div class="presets-section">
+          <div class="presets-title">QUICK PICKS</div>
+          <div class="presets-grid" id="presetGrid"></div>
+        </div>
+
+        <div class="formats-body" id="formatsBody">
+        </div>
+
+        <div class="preview-section">
+          <div class="preview-title">PREVIEW</div>
+          <div class="preview-bars">
+            <div class="preview-swatch" id="previewOnWhite" style="background:#fff;">
+              <span id="previewTextWhite">Text on white</span>
+            </div>
+            <div class="preview-swatch" id="previewOnBlack" style="background:#000;">
+              <span id="previewTextBlack">Text on black</span>
+            </div>
+            <div class="preview-swatch" id="previewAsBg">
+              <span id="previewTextBg">White text on color</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="contrast-section">
+          <div class="preview-title">CONTRAST CHECKER</div>
+          <div class="contrast-input-row">
+            <span style="font-size:11px;color:var(--text-muted);">AGAINST</span>
+            <input type="color" class="contrast-bg-swatch" id="contrastPicker" value="#ffffff" oninput="syncContrastHex(); updateAll();">
+            <input type="text" class="contrast-bg-input" id="contrastInput" value="#ffffff" placeholder="#ffffff" oninput="syncContrastSwatch(); updateAll();" spellcheck="false">
+          </div>
+          <div class="contrast-row">
+            <span class="contrast-label">RATIO</span>
+            <span class="contrast-value" id="contrastRatio">—</span>
+          </div>
+          <div class="contrast-row">
+            <span class="contrast-label">NORMAL</span>
+            <span class="contrast-badge" id="contrastNormal">—</span>
+          </div>
+          <div class="contrast-row">
+            <span class="contrast-label">LARGE</span>
+            <span class="contrast-badge" id="contrastLarge">—</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <span>fast. clean. no clutter.</span>
+    <span><a href="mailto:support@tabtools.dev">support@tabtools.dev</a> · <a href="https://ko-fi.com/bobrew">buy me a coffee</a></span>
+  </footer>
+
+  <div class="copy-toast" id="copyToast">COPIED</div>
+
+  <script>
+    var currentR = 110, currentG = 231, currentB = 183;
+
+    var PRESETS = [
+      '#6ee7b7','#f5a01f','#818cf8','#f87171','#fbbf24',
+      '#34d399','#60a5fa','#c084fc','#fb923c','#f472b6',
+      '#0d0d0d','#ffffff','#e4e4e7','#161616','#059669',
+      '#dc2626','#2563eb','#7c3aed','#ea580c','#0891b2'
+    ];
+
+    function init() {
+      var grid = document.getElementById('presetGrid');
+      var html = '';
+      PRESETS.forEach(function(c) {
+        html += '<div class="color-preset" style="background:' + c + ';" onclick="setColor(\'' + c + '\')" title="' + c + '"></div>';
+      });
+      grid.innerHTML = html;
+      updateAll();
+    }
+
+    function setColor(hex) {
+      var rgb = hexToRgb(hex);
+      if (rgb) {
+        currentR = rgb.r; currentG = rgb.g; currentB = rgb.b;
+        document.getElementById('colorInput').value = hex;
+        document.getElementById('colorPicker').value = hex;
+        updateAll();
+      }
+    }
+
+    function fromPicker() {
+      var hex = document.getElementById('colorPicker').value;
+      document.getElementById('colorInput').value = hex;
+      var rgb = hexToRgb(hex);
+      if (rgb) { currentR = rgb.r; currentG = rgb.g; currentB = rgb.b; updateAll(); }
+    }
+
+    function fromText() {
+      var val = document.getElementById('colorInput').value.trim();
+      var rgb = parseColor(val);
+      if (rgb) {
+        currentR = rgb.r; currentG = rgb.g; currentB = rgb.b;
+        document.getElementById('colorPicker').value = rgbToHex(rgb.r, rgb.g, rgb.b);
+        updateAll();
+      }
+    }
+
+    function parseColor(str) {
+      if (str.match(/^#?[0-9a-fA-F]{3}$/)) {
+        var s = str.replace('#', '');
+        return { r: parseInt(s[0]+s[0],16), g: parseInt(s[1]+s[1],16), b: parseInt(s[2]+s[2],16) };
+      }
+      if (str.match(/^#?[0-9a-fA-F]{6}$/)) {
+        return hexToRgb(str.startsWith('#') ? str : '#' + str);
+      }
+      var rgbMatch = str.match(/rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i);
+      if (rgbMatch) {
+        return { r: parseInt(rgbMatch[1]), g: parseInt(rgbMatch[2]), b: parseInt(rgbMatch[3]) };
+      }
+      var hslMatch = str.match(/hsl\s*\(\s*(\d+)\s*,\s*(\d+)%?\s*,\s*(\d+)%?\s*\)/i);
+      if (hslMatch) {
+        return hslToRgb(parseInt(hslMatch[1]), parseInt(hslMatch[2]), parseInt(hslMatch[3]));
+      }
+      return null;
+    }
+
+    function updateAll() {
+      var r = currentR, g = currentG, b = currentB;
+      var hex = rgbToHex(r, g, b);
+      var hsl = rgbToHsl(r, g, b);
+
+      var formats = [
+        { label: 'HEX', value: hex },
+        { label: 'RGB', value: 'rgb(' + r + ', ' + g + ', ' + b + ')' },
+        { label: 'HSL', value: 'hsl(' + hsl.h + ', ' + hsl.s + '%, ' + hsl.l + '%)' },
+        { label: 'CSS', value: '--color: ' + hex + ';' },
+        { label: 'RGBA', value: 'rgba(' + r + ', ' + g + ', ' + b + ', 1)' },
+        { label: 'R,G,B', value: r + ', ' + g + ', ' + b }
+      ];
+
+      var html = '';
+      formats.forEach(function(f) {
+        html += '<div class="format-row">' +
+          '<span class="format-label">' + f.label + '</span>' +
+          '<span class="format-value">' + f.value + '</span>' +
+          '<button class="format-copy" onclick="copyVal(\'' + f.value.replace(/'/g, "\\'") + '\')">COPY</button>' +
+          '</div>';
+      });
+      document.getElementById('formatsBody').innerHTML = html;
+
+      // Preview
+      document.getElementById('previewTextWhite').style.color = hex;
+      document.getElementById('previewTextWhite').textContent = hex + ' on white';
+      document.getElementById('previewTextBlack').style.color = hex;
+      document.getElementById('previewTextBlack').textContent = hex + ' on black';
+      document.getElementById('previewAsBg').style.background = hex;
+      var textOnBg = luminance(r, g, b) > 0.179 ? '#000000' : '#ffffff';
+      document.getElementById('previewTextBg').style.color = textOnBg;
+      document.getElementById('previewTextBg').textContent = (textOnBg === '#000000' ? 'Black' : 'White') + ' text on ' + hex;
+
+      // Contrast
+      var bgHex = document.getElementById('contrastInput').value.trim();
+      var bgRgb = hexToRgb(bgHex);
+      if (bgRgb) {
+        var ratio = contrastRatio(r, g, b, bgRgb.r, bgRgb.g, bgRgb.b);
+        document.getElementById('contrastRatio').textContent = ratio.toFixed(2) + ':1';
+
+        var normalPass = ratio >= 4.5;
+        var largePass = ratio >= 3;
+        document.getElementById('contrastNormal').textContent = normalPass ? 'AA PASS' : 'AA FAIL';
+        document.getElementById('contrastNormal').className = 'contrast-badge ' + (normalPass ? 'badge-pass' : 'badge-fail');
+        document.getElementById('contrastLarge').textContent = largePass ? 'AA PASS' : 'AA FAIL';
+        document.getElementById('contrastLarge').className = 'contrast-badge ' + (largePass ? 'badge-pass' : 'badge-fail');
+      }
+    }
+
+    function hexToRgb(hex) {
+      hex = hex.replace('#', '');
+      if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+      if (hex.length !== 6) return null;
+      return {
+        r: parseInt(hex.substring(0,2), 16),
+        g: parseInt(hex.substring(2,4), 16),
+        b: parseInt(hex.substring(4,6), 16)
+      };
+    }
+
+    function rgbToHex(r, g, b) {
+      return '#' + [r,g,b].map(function(c) {
+        var h = c.toString(16);
+        return h.length === 1 ? '0' + h : h;
+      }).join('');
+    }
+
+    function rgbToHsl(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      var max = Math.max(r,g,b), min = Math.min(r,g,b);
+      var h, s, l = (max + min) / 2;
+      if (max === min) {
+        h = s = 0;
+      } else {
+        var d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+          case g: h = ((b - r) / d + 2) / 6; break;
+          case b: h = ((r - g) / d + 4) / 6; break;
+        }
+      }
+      return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+    }
+
+    function hslToRgb(h, s, l) {
+      h /= 360; s /= 100; l /= 100;
+      var r, g, b;
+      if (s === 0) {
+        r = g = b = l;
+      } else {
+        function hue2rgb(p, q, t) {
+          if (t < 0) t += 1;
+          if (t > 1) t -= 1;
+          if (t < 1/6) return p + (q - p) * 6 * t;
+          if (t < 1/2) return q;
+          if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+          return p;
+        }
+        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        var p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+      }
+      return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+    }
+
+    function luminance(r, g, b) {
+      var a = [r, g, b].map(function(v) {
+        v /= 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+      });
+      return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+    }
+
+    function contrastRatio(r1, g1, b1, r2, g2, b2) {
+      var l1 = luminance(r1, g1, b1);
+      var l2 = luminance(r2, g2, b2);
+      var lighter = Math.max(l1, l2);
+      var darker = Math.min(l1, l2);
+      return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    function syncContrastHex() {
+      document.getElementById('contrastInput').value = document.getElementById('contrastPicker').value;
+    }
+
+    function syncContrastSwatch() {
+      var val = document.getElementById('contrastInput').value;
+      if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+        document.getElementById('contrastPicker').value = val;
+      }
+    }
+
+    function copyVal(val) {
+      navigator.clipboard.writeText(val).then(function() {
+        var toast = document.getElementById('copyToast');
+        toast.classList.add('show');
+        setTimeout(function() { toast.classList.remove('show'); }, 1500);
+      });
+    }
+
+    init();
+  </script>
+  <script>
+  function toggleTheme() {
+    var current = document.documentElement.getAttribute('data-theme');
+    var next = current === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next === 'dark' ? '' : next);
+    localStorage.setItem('tabtools-theme', next);
+    document.getElementById('themeBtn').textContent = next === 'light' ? 'DARK' : 'LIGHT';
+  }
+  (function() {
+    var saved = localStorage.getItem('tabtools-theme');
+    if (saved === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      var btn = document.getElementById('themeBtn');
+      if (btn) btn.textContent = 'DARK';
+    }
+  })();
+  </script>
+  <script data-goatcounter="https://tabtools.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diff Checker — Compare Text Online — TabTools.dev</title>
+  <meta name="description" content="Compare two blocks of text side by side. See additions, deletions, and changes highlighted. Free, fast, no sign-up.">
+  <meta property="og:title" content="Diff Checker — TabTools.dev">
+  <meta property="og:description" content="Compare two texts and see the differences highlighted instantly. Free online diff tool.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tabtools.dev/tools/diff-checker/">
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    .diff-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .diff-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .diff-input-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .diff-input-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    .diff-textarea {
+      width: 100%;
+      min-height: 200px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-panel);
+      border-radius: var(--radius-panel);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.7;
+      padding: 14px;
+      resize: vertical;
+      outline: none;
+    }
+
+    .diff-textarea:focus {
+      border-color: var(--border-button);
+    }
+
+    .diff-textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .diff-output {
+      display: none;
+    }
+
+    .diff-output.visible {
+      display: block;
+    }
+
+    .diff-stats {
+      display: flex;
+      gap: 16px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-panel);
+      font-size: 12px;
+      flex-wrap: wrap;
+    }
+
+    .stat-add {
+      color: var(--accent);
+    }
+
+    .stat-del {
+      color: #f87171;
+    }
+
+    .stat-same {
+      color: var(--text-muted);
+    }
+
+    .diff-lines {
+      padding: 0;
+      overflow-x: auto;
+    }
+
+    .diff-line {
+      display: flex;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.8;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .diff-line:last-child {
+      border-bottom: none;
+    }
+
+    .diff-line-num {
+      min-width: 40px;
+      padding: 2px 8px;
+      text-align: right;
+      color: var(--text-faint);
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .diff-line-content {
+      flex: 1;
+      padding: 2px 12px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .diff-line.added {
+      background: #6ee7b710;
+    }
+
+    .diff-line.added .diff-line-content {
+      color: var(--accent);
+    }
+
+    .diff-line.added .diff-line-num {
+      color: var(--accent);
+      border-right: 2px solid var(--accent);
+    }
+
+    .diff-line.removed {
+      background: #f8717110;
+    }
+
+    .diff-line.removed .diff-line-content {
+      color: #f87171;
+    }
+
+    .diff-line.removed .diff-line-num {
+      color: #f87171;
+      border-right: 2px solid #f87171;
+    }
+
+    .diff-line.same .diff-line-content {
+      color: var(--text-secondary);
+    }
+
+    .diff-line.same .diff-line-num {
+      border-right: 2px solid transparent;
+    }
+
+    .diff-line-prefix {
+      display: inline;
+      font-weight: 700;
+      user-select: none;
+      margin-right: 8px;
+    }
+
+    .diff-mode-bar {
+      display: flex;
+      gap: 6px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-panel);
+      align-items: center;
+    }
+
+    .diff-mode-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      margin-right: 4px;
+    }
+
+    .mode-btn {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: var(--radius);
+      background: var(--btn-secondary-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border-button);
+      cursor: pointer;
+      transition: color 0.1s, border-color 0.1s;
+    }
+
+    .mode-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .mode-btn.active {
+      background: var(--btn-primary-bg);
+      color: var(--btn-primary-text);
+      border-color: var(--btn-primary-bg);
+      font-weight: 700;
+    }
+
+    .copy-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--accent);
+      color: var(--bg-primary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 20px;
+      border-radius: var(--radius);
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .copy-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 640px) {
+      .diff-inputs {
+        grid-template-columns: 1fr;
+      }
+
+      .diff-line-num {
+        min-width: 30px;
+        padding: 2px 4px;
+        font-size: 10px;
+      }
+
+      .diff-line-content {
+        padding: 2px 8px;
+        font-size: 11px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="/" class="site-logo">
+      <div class="logo-dot"></div>
+      <div class="logo-text">
+        <span class="logo-tab">tab</span><span class="logo-tools">tools</span><span class="logo-tld">.dev</span>
+      </div>
+    </a>
+    <nav class="site-nav">
+      <a href="/tools/json-formatter/">JSON</a>
+      <a href="/tools/cron-builder/">CRON</a>
+      <a href="/tools/webhook-tester/">WEBHOOK</a>
+      <a href="/">ALL</a>
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">LIGHT</button>
+    </nav>
+  </header>
+
+  <main class="site-main">
+
+    <div class="diff-layout">
+
+      <div class="diff-inputs">
+        <div class="diff-input-wrap">
+          <span class="diff-input-label">ORIGINAL</span>
+          <textarea class="diff-textarea" id="inputA" placeholder="$ paste original text here..." spellcheck="false"></textarea>
+        </div>
+        <div class="diff-input-wrap">
+          <span class="diff-input-label">MODIFIED</span>
+          <textarea class="diff-textarea" id="inputB" placeholder="$ paste modified text here..." spellcheck="false"></textarea>
+        </div>
+      </div>
+
+      <div class="tool-actions">
+        <button class="btn btn-primary" onclick="runDiff()">COMPARE</button>
+        <button class="btn btn-secondary" onclick="swapInputs()">SWAP</button>
+        <button class="btn btn-secondary" onclick="copyDiff()">COPY DIFF</button>
+        <button class="btn btn-secondary" onclick="clearAll()" style="margin-left: auto;">CLEAR</button>
+      </div>
+
+      <div class="tool-panel diff-output" id="diffOutput">
+        <div class="tool-panel-header">
+          <span class="tool-panel-title">diff checker</span>
+          <div class="tool-panel-dots">
+            <div class="tool-panel-dot"></div>
+            <div class="tool-panel-dot"></div>
+            <div class="tool-panel-dot active"></div>
+          </div>
+        </div>
+
+        <div class="diff-stats" id="diffStats"></div>
+
+        <div class="diff-mode-bar">
+          <span class="diff-mode-label">VIEW</span>
+          <button class="mode-btn active" id="modeUnified" onclick="setMode('unified')">UNIFIED</button>
+          <button class="mode-btn" id="modeChanges" onclick="setMode('changes')">CHANGES ONLY</button>
+        </div>
+
+        <div class="diff-lines" id="diffLines"></div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <span>fast. clean. no clutter.</span>
+    <span><a href="mailto:support@tabtools.dev">support@tabtools.dev</a> · <a href="https://ko-fi.com/bobrew">buy me a coffee</a></span>
+  </footer>
+
+  <div class="copy-toast" id="copyToast">COPIED</div>
+
+  <script>
+    var currentDiff = [];
+    var currentMode = 'unified';
+
+    function runDiff() {
+      var a = document.getElementById('inputA').value;
+      var b = document.getElementById('inputB').value;
+
+      if (!a && !b) return;
+
+      var linesA = a.split('\n');
+      var linesB = b.split('\n');
+
+      currentDiff = computeDiff(linesA, linesB);
+      renderDiff();
+
+      document.getElementById('diffOutput').classList.add('visible');
+    }
+
+    function computeDiff(a, b) {
+      var m = a.length, n = b.length;
+      var max = m + n;
+      var v = new Array(2 * max + 1);
+      var trace = [];
+
+      for (var i = 0; i < v.length; i++) v[i] = 0;
+
+      for (var d = 0; d <= max; d++) {
+        trace.push(v.slice());
+        for (var k = -d; k <= d; k += 2) {
+          var idx = k + max;
+          var x;
+          if (k === -d || (k !== d && v[idx - 1] < v[idx + 1])) {
+            x = v[idx + 1];
+          } else {
+            x = v[idx - 1] + 1;
+          }
+          var y = x - k;
+          while (x < m && y < n && a[x] === b[y]) {
+            x++; y++;
+          }
+          v[idx] = x;
+          if (x >= m && y >= n) {
+            return backtrack(trace, a, b, max);
+          }
+        }
+      }
+      return backtrack(trace, a, b, max);
+    }
+
+    function backtrack(trace, a, b, max) {
+      var x = a.length, y = b.length;
+      var result = [];
+
+      for (var d = trace.length - 1; d >= 0; d--) {
+        var v = trace[d];
+        var k = x - y;
+        var idx = k + max;
+        var prevK;
+
+        if (k === -d || (k !== d && v[idx - 1] < v[idx + 1])) {
+          prevK = k + 1;
+        } else {
+          prevK = k - 1;
+        }
+
+        var prevX = v[prevK + max];
+        var prevY = prevX - prevK;
+
+        while (x > prevX && y > prevY) {
+          x--; y--;
+          result.unshift({ type: 'same', text: a[x], lineA: x + 1, lineB: y + 1 });
+        }
+
+        if (d > 0) {
+          if (x === prevX) {
+            y--;
+            result.unshift({ type: 'added', text: b[y], lineB: y + 1 });
+          } else {
+            x--;
+            result.unshift({ type: 'removed', text: a[x], lineA: x + 1 });
+          }
+        }
+      }
+
+      return result;
+    }
+
+    function renderDiff() {
+      var lines = currentMode === 'changes' ? currentDiff.filter(function(d) { return d.type !== 'same'; }) : currentDiff;
+
+      var added = 0, removed = 0, same = 0;
+      currentDiff.forEach(function(d) {
+        if (d.type === 'added') added++;
+        else if (d.type === 'removed') removed++;
+        else same++;
+      });
+
+      document.getElementById('diffStats').innerHTML =
+        '<span class="stat-add">+ ' + added + ' added</span>' +
+        '<span class="stat-del">- ' + removed + ' removed</span>' +
+        '<span class="stat-same">' + same + ' unchanged</span>';
+
+      var html = '';
+      lines.forEach(function(d) {
+        var prefix = d.type === 'added' ? '+' : d.type === 'removed' ? '-' : ' ';
+        var num = d.type === 'added' ? (d.lineB || '') : (d.lineA || '');
+        html += '<div class="diff-line ' + d.type + '">' +
+          '<span class="diff-line-num">' + num + '</span>' +
+          '<span class="diff-line-content"><span class="diff-line-prefix">' + prefix + '</span>' + escapeHtml(d.text) + '</span>' +
+          '</div>';
+      });
+
+      document.getElementById('diffLines').innerHTML = html;
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById('modeUnified').classList.toggle('active', mode === 'unified');
+      document.getElementById('modeChanges').classList.toggle('active', mode === 'changes');
+      if (currentDiff.length > 0) renderDiff();
+    }
+
+    function swapInputs() {
+      var a = document.getElementById('inputA');
+      var b = document.getElementById('inputB');
+      var tmp = a.value;
+      a.value = b.value;
+      b.value = tmp;
+    }
+
+    function copyDiff() {
+      if (currentDiff.length === 0) return;
+      var text = currentDiff.map(function(d) {
+        var prefix = d.type === 'added' ? '+ ' : d.type === 'removed' ? '- ' : '  ';
+        return prefix + d.text;
+      }).join('\n');
+      navigator.clipboard.writeText(text).then(function() {
+        var toast = document.getElementById('copyToast');
+        toast.classList.add('show');
+        setTimeout(function() { toast.classList.remove('show'); }, 1500);
+      });
+    }
+
+    function clearAll() {
+      document.getElementById('inputA').value = '';
+      document.getElementById('inputB').value = '';
+      document.getElementById('diffOutput').classList.remove('visible');
+      currentDiff = [];
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+  </script>
+  <script>
+  function toggleTheme() {
+    var current = document.documentElement.getAttribute('data-theme');
+    var next = current === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next === 'dark' ? '' : next);
+    localStorage.setItem('tabtools-theme', next);
+    document.getElementById('themeBtn').textContent = next === 'light' ? 'DARK' : 'LIGHT';
+  }
+  (function() {
+    var saved = localStorage.getItem('tabtools-theme');
+    if (saved === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      var btn = document.getElementById('themeBtn');
+      if (btn) btn.textContent = 'DARK';
+    }
+  })();
+  </script>
+  <script data-goatcounter="https://tabtools.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
