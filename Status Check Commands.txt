@@ -1,0 +1,13 @@
+ssh eber@146.190.133.14
+sudo nginx -t
+sudo systemctl status tabtools-webhook
+sudo fail2ban-client status sshd
+sudo ufw status
+sudo certbot certificates
+df -h /
+free -h
+
+need check how often to run these:
+
+sudo apt install unattended-upgrades -y
+sudo dpkg-reconfigure -plow unattended-upgrades

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 — TabTools.dev</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="/" class="site-logo">
+      <div class="logo-dot"></div>
+      <div class="logo-text">
+        <span class="logo-tab">tab</span><span class="logo-tools">tools</span><span class="logo-tld">.dev</span>
+      </div>
+    </a>
+    <nav class="site-nav">
+      <a href="/tools/json-formatter/">JSON</a>
+      <a href="/tools/cron-builder/">CRON</a>
+      <a href="/tools/webhook-tester/">WEBHOOK</a>
+      <a href="/">ALL</a>
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">LIGHT</button>
+    </nav>
+  </header>
+
+  <main class="site-main" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center;">
+
+    <div style="font-size: 64px; font-weight: 700; color: var(--accent); margin-bottom: 12px;">404</div>
+    <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px;">
+      <span style="color: var(--accent);">$</span> page not found
+    </div>
+    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 2rem;">
+      The URL you requested doesn't exist on this server.
+    </div>
+
+    <a href="/" class="btn btn-primary" style="text-decoration: none; font-size: 13px; padding: 10px 24px;">BACK TO TOOLS</a>
+
+  </main>
+
+  <footer class="site-footer">
+    <span>fast. clean. no clutter.</span>
+    <span><a href="mailto:support@tabtools.dev">support@tabtools.dev</a> · <a href="https://ko-fi.com/bobrew">buy me a coffee</a></span>
+  </footer>
+
+  <script>
+  function toggleTheme() {
+    var current = document.documentElement.getAttribute('data-theme');
+    var next = current === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next === 'dark' ? '' : next);
+    localStorage.setItem('tabtools-theme', next);
+    document.getElementById('themeBtn').textContent = next === 'light' ? 'DARK' : 'LIGHT';
+  }
+  (function() {
+    var saved = localStorage.getItem('tabtools-theme');
+    if (saved === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      var btn = document.getElementById('themeBtn');
+      if (btn) btn.textContent = 'DARK';
+    }
+  })();
+  </script>
+</body>
+</html>

@@ -6,29 +6,33 @@ Fast, clean developer utilities — the tabs you keep open while you work.
 
 TabTools is a collection of free browser-based tools for developers, IT professionals, and anyone who works with data. Each tool does one thing well, loads fast, and stays out of your way. No sign-ups, no bloat, no pop-ups.
 
-## Planned Tools
+## Live Tools
 
 - **JSON Formatter** — Paste messy JSON, get it pretty-printed, validated, and syntax-highlighted
 - **Cron Expression Builder** — Visual cron schedule builder with plain-English translation and next-run preview
 - **Webhook Tester** — Unique URL that logs incoming requests in real time for debugging integrations
 - **Placeholder Image Generator** — Custom placeholder images by size, color, and text
-- **Markdown Resume Builder** — Write your resume in Markdown, preview live, export as PDF
-- **Text Utilities** — Word counter, case converter, character counter, text diff
-- **Random Generators** — Names, passwords, test data, writing prompts
-
-Tools are released one at a time. This list will evolve.
+- **Text Utilities** — Word counter, case converter, character counter, find & replace, 17 transforms
+- **Regex Tester** — Test regular expressions in real time with match highlighting and capture groups
+- **Diff Checker** — Compare two blocks of text side by side with additions and deletions highlighted
+- **Color Converter** — Convert between hex, RGB, and HSL with preview swatches and contrast checker
 
 ## Tech Stack
 
 - **Server:** Ubuntu 24.04 on DigitalOcean
 - **Web server:** nginx with reverse proxy and SSL via Let's Encrypt
 - **Frontend:** Vanilla HTML, CSS, and JavaScript (no framework — speed is the priority)
-- **Backend:** Node.js + Express (only for tools that need server-side processing)
+- **Backend:** Node.js + Express (webhook tester only)
+- **Process management:** systemd service for Node backend
+- **Monitoring:** Custom healthcheck (22 tests), weekly/monthly email reports via Resend API
+- **Backups:** Weekly cron backup of server configs, DigitalOcean snapshots
+- **Analytics:** GoatCounter (privacy-respecting, no cookies)
+- **SEO:** Google Search Console, sitemap.xml, Open Graph tags
 - **Domain:** tabtools.dev
 
 ## Development Workflow
 
-This project follows a structured development process from day one:
+This project has been tracked with GitHub Issues from day one:
 
 - **Issues** track all planned work — features, bugs, infrastructure tasks
 - **Branches** are created for each piece of work and merged into `main` when complete
@@ -40,23 +44,34 @@ This project follows a structured development process from day one:
 
 ```
 tabtools/
-├── docs/               # Deployment guide, server setup notes
-├── site/               # Site shell — homepage, shared layout, styles
-│   ├── index.html
+├── docs/                  # Deployment guide, server config backups
+│   ├── deployment.md
+│   └── server-configs/
+├── site/                  # All frontend files (nginx web root)
+│   ├── index.html         # Homepage
+│   ├── 404.html           # Custom error page
+│   ├── sitemap.xml
+│   ├── robots.txt
 │   ├── css/
-│   └── shared/
-├── tools/              # Each tool in its own directory
-│   ├── json-formatter/
-│   ├── cron-builder/
-│   └── .../
-└── server/             # Backend API (when needed)
+│   │   └── style.css      # Design system with dark/light mode
+│   └── tools/
+│       ├── json-formatter/
+│       ├── cron-builder/
+│       ├── webhook-tester/
+│       ├── placeholder-images/
+│       ├── text-utilities/
+│       ├── regex-tester/
+│       ├── diff-checker/
+│       └── color-converter/
+└── server/                # Node.js backend
+    ├── webhook-server.js
+    └── package.json
 ```
 
 ## About
 
-TabTools is built and maintained by [Eber (Tochina)](https://bobrew.dev). AI assists with code generation (primarily Claude). I handle infrastructure, deployment, design direction, and all operational decisions. This collaboration is disclosed openly — the same approach used across my other projects at [bobrew.dev](https://bobrew.dev).
+TabTools is built and maintained by [Eber (Tochina)](https://github.com/eberhampton). AI assists with code generation (primarily Claude). I handle infrastructure, deployment, design direction, and all operational decisions. This collaboration is disclosed openly — the same approach used across my other projects at [bobrew.dev](https://bobrew.dev).
 
 ## License
 
 MIT
-
