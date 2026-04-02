@@ -1,552 +1,538 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Span — Structure Banner Builder</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body, #root { height: 100%; overflow: hidden; }
-    body { font-family: 'Courier New', 'Lucida Console', monospace; background: #111; color: #ddd; }
-  </style>
-  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>ops — tabtools.dev</title>
+    <style>
+        /* ── tabtools.dev design system ── */
+        :root {
+            --bg-primary: #0d0d0d;
+            --surface: #161616;
+            --deep-surface: #0d0d0d;
+            --border-panel: #252525;
+            --border-subtle: #1a1a1a;
+            --border-button: #333;
+            --text-primary: #f5f5f5;
+            --text-secondary: #c0c0c0;
+            --text-muted: #a0a0a0;
+            --text-faint: #808080;
+            --accent: #6ee7b7;
+            --amber: #f5a01f;
+            --red: #ef4444;
+            --indigo: #818cf8;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f5f5f0;
+            --surface: #ffffff;
+            --deep-surface: #f5f5f0;
+            --border-panel: #d4d4d4;
+            --border-subtle: #e5e5e0;
+            --border-button: #c0c0c0;
+            --text-primary: #1a1a1a;
+            --text-secondary: #404040;
+            --text-muted: #606060;
+            --text-faint: #909090;
+            --accent: #059669;
+            --amber: #b45309;
+            --red: #dc2626;
+            --indigo: #6d28d9;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        /* ── Header ── */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-panel);
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .logo .tab { color: var(--text-primary); }
+        .logo .tools { color: var(--accent); }
+        .logo .ops { color: var(--text-faint); font-weight: normal; }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border-button);
+            color: var(--text-muted);
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            padding: 4px 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .theme-toggle:hover { color: var(--text-primary); }
+
+        .refresh-info {
+            font-size: 11px;
+            color: var(--text-faint);
+        }
+
+        /* ── Main ── */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .page-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+            margin-bottom: 8px;
+        }
+
+        .collected-at {
+            font-size: 12px;
+            color: var(--text-faint);
+            margin-bottom: 24px;
+        }
+
+        .collected-at span { color: var(--amber); }
+
+        /* ── Grid ── */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .grid-full {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 700px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        /* ── Card ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border-panel);
+            border-radius: 3px;
+            padding: 16px 20px;
+        }
+
+        .card-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        /* ── Status rows ── */
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            font-size: 13px;
+        }
+
+        .status-row + .status-row {
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .status-label {
+            color: var(--text-muted);
+        }
+
+        .status-value {
+            color: var(--text-primary);
+            text-align: right;
+        }
+
+        /* ── Indicators ── */
+        .ok { color: var(--accent); }
+        .warn { color: var(--amber); }
+        .bad { color: var(--red); }
+
+        .indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .dot-ok { background: var(--accent); }
+        .dot-warn { background: var(--amber); }
+        .dot-bad { background: var(--red); }
+
+        .dot-ok.pulse {
+            animation: pulse-green 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-green {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* ── Bar ── */
+        .bar-container {
+            width: 100%;
+            height: 6px;
+            background: var(--border-panel);
+            border-radius: 2px;
+            margin-top: 6px;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.4s ease;
+        }
+
+        /* ── Top pages table ── */
+        .pages-table {
+            width: 100%;
+            font-size: 13px;
+        }
+
+        .pages-table-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+        }
+
+        .pages-table-row + .pages-table-row {
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .pages-path {
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+            margin-right: 16px;
+        }
+
+        .pages-count {
+            color: var(--accent);
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ── Banned IPs ── */
+        .banned-list {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            word-break: break-all;
+        }
+
+        /* ── Loading / Error ── */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-faint);
+            font-size: 14px;
+        }
+
+        .error-msg {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--red);
+            font-size: 14px;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            padding: 16px 24px;
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-faint);
+            border-top: 1px solid var(--border-subtle);
+            margin-top: 32px;
+        }
+    </style>
 </head>
 <body>
-<div id="root"></div>
-<script type="text/babel">
-const { useState, useRef, useEffect } = React;
-
-const SNAP_RAD = (22.5 * Math.PI) / 180;
-const GRID = 20;
-const HANDLE_R = 7;
-const HIT = 10;
-
-const SIZES = [
-  { label: "1200×400", w: 1200, h: 400 },
-  { label: "800×300",  w: 800,  h: 300 },
-  { label: "600×200",  w: 600,  h: 200 },
-  { label: "400×400",  w: 400,  h: 400 },
-];
-
-const PALETTE = ["#0a0a0a","#2d2d2d","#555555","#888888","#aaaaaa"];
-const PAL_LABELS = ["black","charcoal","gray","silver","ash"];
-const WIDTHS = [1, 2, 4, 6];
-
-const SKY_PRESETS = [
-  { label:"Day",      stops:[["#87ceeb","0%"],["#dff0fb","100%"]] },
-  { label:"Dusk",     stops:[["#ff7e5f","0%"],["#feb47b","50%"],["#ffd6a5","100%"]] },
-  { label:"Night",    stops:[["#0a0a1a","0%"],["#1a2a4a","100%"]] },
-  { label:"Overcast", stops:[["#b0b8c1","0%"],["#d8dde2","100%"]] },
-  { label:"Storm",    stops:[["#2c3e50","0%"],["#4a5568","100%"]] },
-  { label:"None",     stops:null },
-];
-
-const WATER_PRESETS = [
-  { label:"Ocean", colors:["#1a6fa3","#2388c4","#5badd4"] },
-  { label:"River", colors:["#2e7d5c","#3a9e72","#6ec89a"] },
-  { label:"Lake",  colors:["#1b4f72","#2471a3","#5dade2"] },
-  { label:"None",  colors:null },
-];
-
-const MTN_PRESETS = [
-  { label:"Far",  color:"#9eaab7", h:0.45 },
-  { label:"Near", color:"#6b7a8a", h:0.55 },
-  { label:"Dark", color:"#2d3748", h:0.50 },
-  { label:"None", color:null },
-];
-
-const TREE_PRESETS = [
-  { label:"Forest", color:"#2d5a27", density:14 },
-  { label:"Sparse", color:"#3a7a32", density:7  },
-  { label:"Dark",   color:"#1a3d18", density:10 },
-  { label:"None",   color:null },
-];
-
-const BIRD_PRESETS = [
-  { label:"Few",   count:6  },
-  { label:"Flock", count:18 },
-  { label:"None",  count:0  },
-];
-
-let _i = 0;
-const uid = () => `e${++_i}`;
-const gs = v => Math.round(v / GRID) * GRID;
-
-function asnap(x1,y1,x2,y2) {
-  const dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy);
-  if (len<1) return [x2,y2];
-  const a=Math.round(Math.atan2(dy,dx)/SNAP_RAD)*SNAP_RAD;
-  return [x1+Math.cos(a)*len, y1+Math.sin(a)*len];
-}
-
-function d2seg(px,py,x1,y1,x2,y2) {
-  const dx=x2-x1,dy=y2-y1,l2=dx*dx+dy*dy;
-  if (l2===0) return Math.hypot(px-x1,py-y1);
-  const t=Math.max(0,Math.min(1,((px-x1)*dx+(py-y1)*dy)/l2));
-  return Math.hypot(px-x1-t*dx,py-y1-t*dy);
-}
-
-function svgP(svg,cx,cy) {
-  const p=svg.createSVGPoint(); p.x=cx; p.y=cy;
-  const m=svg.getScreenCTM();
-  return m?p.matrixTransform(m.inverse()):{x:cx,y:cy};
-}
-
-function seededRands(seed,n) {
-  const r=[]; let s=seed;
-  for (let i=0;i<n;i++) { s=(s*1664525+1013904223)&0xffffffff; r.push((s>>>0)/0xffffffff); }
-  return r;
-}
-
-function SceneSky({sky,w,h}) {
-  if (!sky.stops) return null;
-  return (
-    <g>
-      <defs>
-        <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1">
-          {sky.stops.map(([c,o],i)=><stop key={i} offset={o} stopColor={c}/>)}
-        </linearGradient>
-      </defs>
-      <rect width={w} height={h} fill="url(#skyG)"/>
-    </g>
-  );
-}
-
-function SceneMountains({mtn,w,h}) {
-  if (!mtn.color) return null;
-  const rs=seededRands(42,24);
-  const baseY=h*mtn.h;
-  const xs=Array.from({length:12},(_,i)=>i/11*w);
-  const ys=xs.map((_,i)=>i===0||i===11?baseY:baseY-rs[i*2]*h*0.22);
-  const d=xs.map((x,i)=>`${i===0?'M':'L'}${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ')+` L${w},${h} L0,${h} Z`;
-  return <path d={d} fill={mtn.color}/>;
-}
-
-function SceneTrees({trees,w,h}) {
-  if (!trees.color) return null;
-  const by=h*0.72, n=trees.density, rs=seededRands(77,n*3);
-  return (
-    <g>
-      {Array.from({length:n},(_,i)=>{
-        const tx=rs[i*3]*w, th=18+rs[i*3+1]*22, tw=9+rs[i*3+2]*10, ty=by-th;
-        return (
-          <g key={i}>
-            <rect x={tx-2} y={ty+th*0.6} width={4} height={th*0.4} fill="#3d2b1f"/>
-            <polygon points={`${tx},${ty} ${tx-tw},${ty+th*0.65} ${tx+tw},${ty+th*0.65}`} fill={trees.color}/>
-            <polygon points={`${tx},${ty+th*0.3} ${tx-tw*0.8},${ty+th*0.85} ${tx+tw*0.8},${ty+th*0.85}`} fill={trees.color} fillOpacity={0.75}/>
-          </g>
-        );
-      })}
-    </g>
-  );
-}
-
-function SceneWater({water,w,h}) {
-  if (!water.colors) return null;
-  const [c1,c2,c3]=water.colors, wh=h*0.22, by=h-wh, ww=w/8;
-  const w1=Array.from({length:9},(_,i)=>`${i===0?'M':'L'}${(i*ww).toFixed(1)},${(by+Math.sin(i*1.2)*8).toFixed(1)}`).join(' ');
-  const w2=Array.from({length:9},(_,i)=>`${i===0?'M':'L'}${(i*ww).toFixed(1)},${(by+wh*0.38+Math.sin(i*1.1+1)*6).toFixed(1)}`).join(' ');
-  return (
-    <g>
-      <rect x={0} y={by} width={w} height={wh} fill={c1}/>
-      <path d={w1+` L${w},${h} L0,${h} Z`} fill={c2} fillOpacity={0.7}/>
-      <path d={w2+` L${w},${h} L0,${h} Z`} fill={c3} fillOpacity={0.5}/>
-    </g>
-  );
-}
-
-function SceneBirds({birds,w,h}) {
-  if (!birds.count) return null;
-  const rs=seededRands(13,birds.count*2);
-  return (
-    <g>
-      {Array.from({length:birds.count},(_,i)=>{
-        const bx=rs[i*2]*w, by=rs[i*2+1]*h*0.42+h*0.05, s=4+rs[i*2]*3;
-        return <path key={i}
-          d={`M${bx},${by} Q${bx-s},${by-s/2} ${bx-s*2},${by} M${bx},${by} Q${bx+s},${by-s/2} ${bx+s*2},${by}`}
-          stroke="#222" strokeWidth={1} fill="none" strokeLinecap="round"/>;
-      })}
-    </g>
-  );
-}
-
-function mkSusp(w,h) {
-  const dy=h*.65,tt=h*.18,tl=w*.22,tr=w*.78,al=w*.04,ar=w*.96,mx=w*.5,my=dy-h*.14;
-  const E=[];
-  const b=(x1,y1,x2,y2,sw=4,color='#0a0a0a')=>({id:uid(),type:'beam',x1,y1,x2,y2,color,sw});
-  const c=(x1,y1,x2,y2,sw=2)=>({id:uid(),type:'cable',x1,y1,x2,y2,color:'#444',sw});
-  E.push(b(al,dy,ar,dy,5));
-  E.push(b(tl,tt,tl,dy+12,5),b(tr,tt,tr,dy+12,5));
-  E.push(b(tl-14,tt+28,tl+14,tt+28,3),b(tr-14,tt+28,tr+14,tt+28,3));
-  E.push(c(al,tt+28,tl,tt),c(tl,tt,mx,my),c(mx,my,tr,tt),c(tr,tt,ar,tt+28));
-  for (let i=1;i<=6;i++) {
-    const t=i/7,cx=tl+(tr-tl)*t;
-    const cy=t<=.5?tt+(my-tt)*(t*2):my+(tt-my)*((t-.5)*2);
-    E.push(c(cx,cy,cx,dy,1));
-  }
-  return E;
-}
-
-function mkTruss(w,h) {
-  const dy=h*.7,tp=h*.22,L=w*.05,R=w*.95,n=8,dx=(R-L)/n;
-  const E=[];
-  const b=(x1,y1,x2,y2,sw,color='#0a0a0a')=>({id:uid(),type:'beam',x1,y1,x2,y2,color,sw:sw||3});
-  for (let i=0;i<n;i++) {
-    E.push(b(L+i*dx,dy,L+(i+1)*dx,dy,4),b(L+i*dx,tp,L+(i+1)*dx,tp,4),b(L+i*dx,tp,L+i*dx,dy,2));
-    E.push(b(i%2===0?L+i*dx:L+(i+1)*dx,i%2===0?dy:tp,i%2===0?L+(i+1)*dx:L+i*dx,i%2===0?tp:dy,2,'#555'));
-  }
-  E.push(b(L+n*dx,tp,L+n*dx,dy,2));
-  return E;
-}
-
-function mkArch(w,h) {
-  const dy=h*.68,at=h*.15,L=w*.06,R=w*.94;
-  const E=[];
-  const b=(x1,y1,x2,y2,sw=4,color='#0a0a0a')=>({id:uid(),type:'beam',x1,y1,x2,y2,color,sw});
-  E.push(b(L,dy,R,dy,5));
-  for (let i=0;i<16;i++) {
-    const t1=i/16,t2=(i+1)/16;
-    E.push(b(L+(R-L)*t1,dy-(dy-at)*4*t1*(1-t1),L+(R-L)*t2,dy-(dy-at)*4*t2*(1-t2),4));
-  }
-  for (let i=1;i<=8;i++) {
-    const t=i/9,cx=L+(R-L)*t,ay=dy-(dy-at)*4*t*(1-t);
-    if (ay<dy-5) E.push({id:uid(),type:'cable',x1:cx,y1:ay,x2:cx,y2:dy,color:'#555',sw:1});
-  }
-  return E;
-}
-
-const TEMPLATES=[{label:'Suspension',make:mkSusp},{label:'Truss',make:mkTruss},{label:'Arch',make:mkArch}];
-const TOOLS_DEF=[
-  {id:'select',sym:'\u2196',tip:'Select / Move  (S)'},
-  {id:'beam',  sym:'\u2501',tip:'Beam \u2014 solid  (B)'},
-  {id:'cable', sym:'\u254C',tip:'Cable \u2014 dashed  (C)'},
-  {id:'node',  sym:'\u25CF',tip:'Node / Joint  (N)'},
-];
-
-function Span() {
-  const [sizeIdx,setSizeIdx]=useState(0);
-  const [showGrid,setShowGrid]=useState(true);
-  const [els,setEls]=useState([]);
-  const [selId,setSelId]=useState(null);
-  const [tool,setTool]=useState('select');
-  const [color,setColor]=useState(PALETTE[0]);
-  const [sw,setSw]=useState(3);
-  const [drawing,setDrawing]=useState(null);
-  const [preview,setPreview]=useState(null);
-  const [drag,setDrag]=useState(null);
-  const [tab,setTab]=useState('structure');
-  const [sky,setSky]=useState(SKY_PRESETS[5]);
-  const [water,setWater]=useState(WATER_PRESETS[3]);
-  const [mtn,setMtn]=useState(MTN_PRESETS[3]);
-  const [trees,setTrees]=useState(TREE_PRESETS[3]);
-  const [birds,setBirds]=useState(BIRD_PRESETS[2]);
-
-  const svgRef=useRef(null);
-  const {w,h}=SIZES[sizeIdx];
-  const sel=els.find(e=>e.id===selId)||null;
-
-  function hitTest(x,y) {
-    if (sel) {
-      if (Math.hypot(x-sel.x1,y-sel.y1)<=HANDLE_R+3) return {id:sel.id,h:'p1'};
-      if (sel.type!=='node'&&Math.hypot(x-sel.x2,y-sel.y2)<=HANDLE_R+3) return {id:sel.id,h:'p2'};
-    }
-    for (let i=els.length-1;i>=0;i--) {
-      const e=els[i];
-      const d=e.type==='node'?Math.hypot(x-e.x1,y-e.y1)-(e.r||7):d2seg(x,y,e.x1,e.y1,e.x2,e.y2);
-      if (d<=HIT) return {id:e.id,h:'body'};
-    }
-    return null;
-  }
-
-  function onPD(ev) {
-    if (ev.button!==0) return;
-    ev.currentTarget.setPointerCapture(ev.pointerId);
-    const {x,y}=svgP(svgRef.current,ev.clientX,ev.clientY);
-    const gx=gs(x),gy=gs(y);
-    if (tool==='select') {
-      const hit=hitTest(x,y);
-      if (hit) { setSelId(hit.id); setDrag({id:hit.id,h:hit.h,sx:x,sy:y,orig:{...els.find(e=>e.id===hit.id)}}); }
-      else setSelId(null);
-    } else if (tool==='node') {
-      setEls(a=>[...a,{id:uid(),type:'node',x1:gx,y1:gy,x2:gx,y2:gy,r:7,color,sw}]);
-    } else {
-      if (!drawing) { setDrawing({x1:gx,y1:gy}); setPreview({x:gx,y:gy}); }
-      else {
-        const [ax,ay]=asnap(drawing.x1,drawing.y1,gx,gy);
-        setEls(a=>[...a,{id:uid(),type:tool,x1:drawing.x1,y1:drawing.y1,x2:Math.round(ax),y2:Math.round(ay),color,sw}]);
-        setDrawing(null); setPreview(null);
-      }
-    }
-  }
-
-  function onPM(ev) {
-    const {x,y}=svgP(svgRef.current,ev.clientX,ev.clientY);
-    const gx=gs(x),gy=gs(y);
-    if (drawing) { const [ax,ay]=asnap(drawing.x1,drawing.y1,gx,gy); setPreview({x:ax,y:ay}); }
-    if (drag) {
-      const dx=x-drag.sx,dy=y-drag.sy,o=drag.orig;
-      setEls(a=>a.map(e=>{
-        if (e.id!==drag.id) return e;
-        if (drag.h==='body') return {...e,x1:gs(o.x1+dx),y1:gs(o.y1+dy),x2:gs(o.x2+dx),y2:gs(o.y2+dy)};
-        if (drag.h==='p1') { const [ax,ay]=asnap(o.x2,o.y2,gs(o.x1+dx),gs(o.y1+dy)); return {...e,x1:Math.round(ax),y1:Math.round(ay)}; }
-        const [ax,ay]=asnap(o.x1,o.y1,gs(o.x2+dx),gs(o.y2+dy)); return {...e,x2:Math.round(ax),y2:Math.round(ay)};
-      }));
-    }
-  }
-
-  const onPU=()=>setDrag(null);
-
-  useEffect(()=>{
-    function kd(e) {
-      if (e.target.tagName==='INPUT'||e.target.tagName==='BUTTON') return;
-      if ((e.key==='Delete'||e.key==='Backspace')&&selId) { setEls(a=>a.filter(el=>el.id!==selId)); setSelId(null); }
-      if (e.key==='Escape') { setDrawing(null); setPreview(null); setTool('select'); }
-      if (e.key==='s'||e.key==='S') { setTool('select'); setDrawing(null); setPreview(null); }
-      if (e.key==='b'||e.key==='B') setTool('beam');
-      if (e.key==='c'||e.key==='C') setTool('cable');
-      if (e.key==='n'||e.key==='N') setTool('node');
-    }
-    window.addEventListener('keydown',kd);
-    return ()=>window.removeEventListener('keydown',kd);
-  },[selId]);
-
-  function loadTpl(fn) { setEls(fn(w,h)); setSelId(null); setDrawing(null); setPreview(null); setTool('select'); }
-  function updSel(p) { setEls(a=>a.map(e=>e.id===selId?{...e,...p}:e)); }
-
-  function getCleanSVG() {
-    const clone=svgRef.current.cloneNode(true);
-    clone.querySelectorAll('.nx').forEach(n=>n.remove());
-    return new XMLSerializer().serializeToString(clone);
-  }
-
-  function exportSVG() {
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(new Blob([getCleanSVG()],{type:'image/svg+xml'}));
-    a.download='span.svg'; a.click();
-  }
-
-  function exportPNG() {
-    const url=URL.createObjectURL(new Blob([getCleanSVG()],{type:'image/svg+xml'}));
-    const img=new Image();
-    img.onload=()=>{
-      const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
-      cv.getContext('2d').drawImage(img,0,0,w,h);
-      const a=document.createElement('a'); a.href=cv.toDataURL('image/png'); a.download='span.png'; a.click();
-      URL.revokeObjectURL(url);
-    };
-    img.src=url;
-  }
-
-  const mono="'Courier New','Lucida Console',monospace";
-  const smBtn=a=>({padding:'4px 10px',fontSize:10,fontFamily:mono,background:a?'#f0a500':'#1c1c1c',color:a?'#000':'#888',border:`1px solid ${a?'#f0a500':'#2a2a2a'}`,borderRadius:3,cursor:'pointer'});
-  const toolBtn=a=>({padding:'9px 4px',fontSize:14,fontFamily:mono,background:a?'#f0a500':'#1c1c1c',color:a?'#000':'#bbb',border:`1px solid ${a?'#f0a500':'#2a2a2a'}`,borderRadius:3,cursor:'pointer'});
-  const tabBtn=a=>({padding:'6px 14px',fontSize:9,fontFamily:mono,letterSpacing:2,background:a?'#f0a500':'transparent',color:a?'#000':'#444',border:`1px solid ${a?'#f0a500':'#222'}`,borderRadius:3,cursor:'pointer'});
-  const chipBtn=a=>({padding:'4px 9px',fontSize:10,fontFamily:mono,background:a?'#1e1e1e':'transparent',color:a?'#f0a500':'#555',border:`1px solid ${a?'#f0a500':'#222'}`,borderRadius:3,cursor:'pointer',whiteSpace:'nowrap'});
-
-  const gridEl=showGrid?(()=>{
-    const lines=[];
-    for(let x=0;x<=w;x+=GRID){const m=x%100===0;lines.push(<line key={`v${x}`} x1={x} y1={0} x2={x} y2={h} stroke={m?'#ccc':'#e8e8e8'} strokeWidth={m?.6:.25}/>);}
-    for(let y=0;y<=h;y+=GRID){const m=y%100===0;lines.push(<line key={`h${y}`} x1={0} y1={y} x2={w} y2={y} stroke={m?'#ccc':'#e8e8e8'} strokeWidth={m?.6:.25}/>);}
-    return <g className="nx">{lines}</g>;
-  })():null;
-
-  const selLen=sel&&sel.type!=='node'?Math.round(Math.hypot(sel.x2-sel.x1,sel.y2-sel.y1)):null;
-  const selAng=sel&&sel.type!=='node'?Math.round(Math.atan2(sel.y2-sel.y1,sel.x2-sel.x1)*180/Math.PI):null;
-
-  function SceneRow({label,items,cur,onSel}) {
-    return (
-      <div style={{marginBottom:14}}>
-        <div style={{fontSize:9,letterSpacing:3,color:'#3a3a3a',marginBottom:6}}>{label}</div>
-        <div style={{display:'flex',flexWrap:'wrap',gap:4}}>
-          {items.map(it=>(
-            <button key={it.label} onClick={()=>onSel(it)} style={chipBtn(cur.label===it.label)}>{it.label}</button>
-          ))}
+    <div class="header">
+        <div class="logo">
+            <span class="tab">tab</span><span class="tools">tools</span>
+            <span class="ops"> /ops</span>
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div style={{display:'flex',flexDirection:'column',height:'100vh',background:'#111',color:'#ddd',fontFamily:mono,userSelect:'none',overflow:'hidden'}}>
-
-      <header style={{display:'flex',alignItems:'center',gap:16,padding:'9px 18px',background:'#0a0a0a',borderBottom:'1px solid #1e1e1e',flexShrink:0}}>
-        <span style={{fontSize:16,fontWeight:700,letterSpacing:5,color:'#f0a500'}}>span</span>
-        <span style={{fontSize:10,color:'#2e2e2e',letterSpacing:2}}>// STRUCTURE BANNER BUILDER</span>
-        <span style={{marginLeft:'auto',fontSize:9,color:'#252525',letterSpacing:1}}>v2.0</span>
-      </header>
-
-      <div style={{display:'flex',flex:1,overflow:'hidden'}}>
-
-        <aside style={{width:186,background:'#141414',borderRight:'1px solid #1e1e1e',padding:14,display:'flex',flexDirection:'column',overflowY:'auto',flexShrink:0}}>
-          <div style={{display:'flex',gap:4,marginBottom:16}}>
-            <button onClick={()=>setTab('structure')} style={tabBtn(tab==='structure')}>STRUCT</button>
-            <button onClick={()=>setTab('scene')}     style={tabBtn(tab==='scene')}>SCENE</button>
-          </div>
-
-          {tab==='structure'&&<>
-            <div style={{fontSize:9,letterSpacing:3,color:'#3a3a3a',marginBottom:8}}>TOOLS</div>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:4,marginBottom:18}}>
-              {TOOLS_DEF.map(t=>(
-                <button key={t.id} title={t.tip} onClick={()=>{setTool(t.id);setDrawing(null);setPreview(null);}} style={toolBtn(tool===t.id)}>{t.sym}</button>
-              ))}
-            </div>
-
-            <div style={{fontSize:9,letterSpacing:3,color:'#3a3a3a',marginBottom:8}}>COLOR</div>
-            <div style={{display:'flex',flexDirection:'column',gap:3,marginBottom:18}}>
-              {PALETTE.map((p,i)=>(
-                <button key={p} onClick={()=>{setColor(p);if(selId)updSel({color:p});}}
-                  style={{display:'flex',alignItems:'center',gap:9,padding:'5px 8px',background:color===p?'#1e1e1e':'transparent',border:`1px solid ${color===p?'#f0a500':'transparent'}`,borderRadius:3,cursor:'pointer'}}>
-                  <span style={{width:22,height:11,background:p,borderRadius:2,border:'1px solid #333',flexShrink:0}}/>
-                  <span style={{fontSize:10,color:'#666',fontFamily:mono}}>{PAL_LABELS[i]}</span>
-                </button>
-              ))}
-            </div>
-
-            <div style={{fontSize:9,letterSpacing:3,color:'#3a3a3a',marginBottom:8}}>STROKE</div>
-            <div style={{display:'flex',gap:4,flexWrap:'wrap',marginBottom:18}}>
-              {WIDTHS.map(n=>(
-                <button key={n} onClick={()=>{setSw(n);if(selId)updSel({sw:n});}}
-                  style={{width:36,height:30,display:'flex',alignItems:'center',justifyContent:'center',background:sw===n?'#1e1e1e':'transparent',border:`1px solid ${sw===n?'#f0a500':'#2a2a2a'}`,borderRadius:3,cursor:'pointer'}}>
-                  <div style={{width:22,height:n,background:sw===n?'#f0a500':'#444',borderRadius:1}}/>
-                </button>
-              ))}
-            </div>
-
-            <div style={{fontSize:9,letterSpacing:3,color:'#3a3a3a',marginBottom:8}}>TEMPLATES</div>
-            <div style={{display:'flex',flexDirection:'column',gap:4}}>
-              {TEMPLATES.map(t=>(
-                <button key={t.label} onClick={()=>loadTpl(t.make)}
-                  style={{padding:'8px 10px',fontSize:11,fontFamily:mono,background:'#1c1c1c',color:'#bbb',border:'1px solid #2a2a2a',borderRadius:3,cursor:'pointer',textAlign:'left'}}>
-                  {'\u21AA'} {t.label}
-                </button>
-              ))}
-            </div>
-          </>}
-
-          {tab==='scene'&&<>
-            <SceneRow label="SKY"       items={SKY_PRESETS}   cur={sky}   onSel={setSky}/>
-            <SceneRow label="MOUNTAINS" items={MTN_PRESETS}   cur={mtn}   onSel={setMtn}/>
-            <SceneRow label="TREES"     items={TREE_PRESETS}  cur={trees} onSel={setTrees}/>
-            <SceneRow label="WATER"     items={WATER_PRESETS} cur={water} onSel={setWater}/>
-            <SceneRow label="BIRDS"     items={BIRD_PRESETS}  cur={birds} onSel={setBirds}/>
-            <div style={{marginTop:4,padding:10,background:'#0e0e0e',border:'1px solid #1a1a1a',borderRadius:4,fontSize:9,color:'#2a2a2a',lineHeight:1.9}}>
-              scene layers render behind<br/>the structure. export<br/>captures all layers.
-            </div>
-          </>}
-        </aside>
-
-        <main style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden',minWidth:0}}>
-          <div style={{display:'flex',alignItems:'center',gap:8,padding:'7px 14px',background:'#141414',borderBottom:'1px solid #1e1e1e',flexWrap:'wrap',flexShrink:0}}>
-            <span style={{fontSize:9,letterSpacing:3,color:'#3a3a3a'}}>SIZE</span>
-            {SIZES.map((s,i)=>(
-              <button key={s.label} onClick={()=>{setSizeIdx(i);setDrawing(null);setPreview(null);}} style={smBtn(sizeIdx===i)}>{s.label}</button>
-            ))}
-            <span style={{width:1,height:16,background:'#222',margin:'0 2px'}}/>
-            <button onClick={()=>setShowGrid(g=>!g)} style={smBtn(showGrid)}>GRID {showGrid?'\u2713':'\u25CB'}</button>
-            <button onClick={()=>{setEls([]);setSelId(null);}} style={{...smBtn(false),color:'#5a2a2a'}}>CLEAR</button>
-            {drawing&&<span style={{fontSize:10,color:'#f0a500',marginLeft:6}}>{'\u25CF'} click endpoint {'\u2014'} ESC cancel</span>}
-          </div>
-
-          <div style={{flex:1,overflow:'auto',padding:24,background:'#191919',display:'flex',alignItems:'flex-start',justifyContent:'flex-start'}}>
-            <div style={{boxShadow:'0 8px 48px rgba(0,0,0,.7)',display:'inline-block',lineHeight:0,flexShrink:0}}>
-              <svg ref={svgRef} viewBox={`0 0 ${w} ${h}`} width={w} height={h}
-                style={{background:'#f8f8f6',display:'block',cursor:tool==='select'?'default':'crosshair'}}
-                onPointerDown={onPD} onPointerMove={onPM} onPointerUp={onPU} onPointerLeave={onPU}>
-
-                <SceneSky sky={sky} w={w} h={h}/>
-                <SceneMountains mtn={mtn} w={w} h={h}/>
-                <SceneTrees trees={trees} w={w} h={h}/>
-                <SceneWater water={water} w={w} h={h}/>
-                <SceneBirds birds={birds} w={w} h={h}/>
-
-                {gridEl}
-
-                {els.map(e=>{
-                  const lc={strokeLinecap:'round',strokeLinejoin:'round'};
-                  if (e.type==='node') return <circle key={e.id} cx={e.x1} cy={e.y1} r={e.r||7} fill={e.color}/>;
-                  return <line key={e.id} x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2}
-                    stroke={e.color} strokeWidth={e.sw}
-                    strokeDasharray={e.type==='cable'?`${e.sw*4} ${e.sw*2}`:undefined}
-                    {...lc}/>;
-                })}
-
-                {sel&&tool==='select'&&(
-                  <g className="nx">
-                    {sel.type!=='node'&&<line x1={sel.x1} y1={sel.y1} x2={sel.x2} y2={sel.y2}
-                      stroke="#f0a500" strokeWidth={sel.sw+8} strokeOpacity={.18} strokeLinecap="round"/>}
-                    {[{x:sel.x1,y:sel.y1},...(sel.type!=='node'?[{x:sel.x2,y:sel.y2}]:[])].map((p,i)=>(
-                      <circle key={i} cx={p.x} cy={p.y} r={HANDLE_R}
-                        fill="#fff" stroke="#f0a500" strokeWidth={2.5} style={{cursor:'crosshair'}}/>
-                    ))}
-                  </g>
-                )}
-
-                {drawing&&preview&&(
-                  <line className="nx" x1={drawing.x1} y1={drawing.y1} x2={preview.x} y2={preview.y}
-                    stroke={color} strokeWidth={sw}
-                    strokeDasharray={tool==='cable'?`${sw*4} ${sw*2}`:undefined}
-                    strokeOpacity={.4} strokeLinecap="round"/>
-                )}
-                {drawing&&<circle className="nx" cx={drawing.x1} cy={drawing.y1} r={5} fill="#f0a500"/>}
-              </svg>
-            </div>
-          </div>
-        </main>
-
-        <aside style={{width:152,background:'#141414',borderLeft:'1px solid #1e1e1e',padding:14,display:'flex',flexDirection:'column',gap:16,flexShrink:0}}>
-          <div>
-            <div style={{fontSize:9,letterSpacing:3,color:'#3a3a3a',marginBottom:8}}>SELECTED</div>
-            {sel?(
-              <div>
-                <div style={{fontSize:11,color:'#f0a500',letterSpacing:2,textTransform:'uppercase',marginBottom:8}}>{sel.type}</div>
-                <div style={{fontSize:10,color:'#444',lineHeight:2}}>
-                  <div>x1 <span style={{color:'#777',float:'right'}}>{Math.round(sel.x1)}</span></div>
-                  <div>y1 <span style={{color:'#777',float:'right'}}>{Math.round(sel.y1)}</span></div>
-                  {sel.type!=='node'&&<>
-                    <div>x2 <span style={{color:'#777',float:'right'}}>{Math.round(sel.x2)}</span></div>
-                    <div>y2 <span style={{color:'#777',float:'right'}}>{Math.round(sel.y2)}</span></div>
-                    <div>len <span style={{color:'#777',float:'right'}}>{selLen}</span></div>
-                    <div>{'\u2220'} <span style={{color:'#777',float:'right'}}>{selAng}{'\u00B0'}</span></div>
-                  </>}
-                </div>
-                <button onClick={()=>{setEls(a=>a.filter(e=>e.id!==selId));setSelId(null);}}
-                  style={{marginTop:10,width:'100%',padding:'7px',fontSize:10,fontFamily:mono,background:'#1c1c1c',color:'#c04040',border:'1px solid #2a2a2a',borderRadius:3,cursor:'pointer'}}>
-                  {'\u2715'} delete
-                </button>
-              </div>
-            ):(
-              <div style={{fontSize:10,color:'#2e2e2e'}}>nothing selected</div>
-            )}
-          </div>
-
-          <div style={{marginTop:'auto'}}>
-            <div style={{fontSize:9,letterSpacing:3,color:'#3a3a3a',marginBottom:8}}>EXPORT</div>
-            <div style={{display:'flex',flexDirection:'column',gap:6}}>
-              <button onClick={exportSVG} style={{padding:'9px',fontSize:11,fontFamily:mono,background:'#1c1c1c',color:'#f0a500',border:'1px solid #f0a500',borderRadius:3,cursor:'pointer'}}>{'\u2193'} SVG</button>
-              <button onClick={exportPNG} style={{padding:'9px',fontSize:11,fontFamily:mono,fontWeight:700,background:'#f0a500',color:'#000',border:'1px solid #f0a500',borderRadius:3,cursor:'pointer'}}>{'\u2193'} PNG</button>
-            </div>
-          </div>
-
-          <div>
-            <div style={{fontSize:9,letterSpacing:3,color:'#3a3a3a',marginBottom:6}}>KEYS</div>
-            <div style={{fontSize:9,color:'#2a2a2a',lineHeight:2.2}}>
-              <div>S {'\u2014'} select</div>
-              <div>B {'\u2014'} beam</div>
-              <div>C {'\u2014'} cable</div>
-              <div>N {'\u2014'} node</div>
-              <div>DEL {'\u2014'} delete</div>
-              <div>ESC {'\u2014'} cancel</div>
-            </div>
-          </div>
-        </aside>
-      </div>
+        <div class="header-right">
+            <span class="refresh-info" id="refresh-info"></span>
+            <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">light</button>
+        </div>
     </div>
-  );
-}
 
-ReactDOM.createRoot(document.getElementById('root')).render(<Span/>);
-</script>
+    <div class="container">
+        <div class="page-title">system status</div>
+        <div class="collected-at" id="collected-at">loading...</div>
+
+        <div id="dashboard-content">
+            <div class="loading">collecting status data...</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        unlisted · auto-refreshes every 5 minutes
+    </div>
+
+    <script>
+        // ── Theme ──
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('tabtools-theme', next);
+            document.getElementById('theme-toggle').textContent = next === 'dark' ? 'light' : 'dark';
+        }
+
+        (function initTheme() {
+            const saved = localStorage.getItem('tabtools-theme');
+            if (saved) {
+                document.documentElement.setAttribute('data-theme', saved);
+                document.getElementById('theme-toggle').textContent = saved === 'dark' ? 'light' : 'dark';
+            }
+        })();
+
+        // ── Helpers ──
+        function ok(text) { return `<span class="ok">${text}</span>`; }
+        function warn(text) { return `<span class="warn">${text}</span>`; }
+        function bad(text) { return `<span class="bad">${text}</span>`; }
+
+        function dot(type, pulsing) {
+            const cls = pulsing ? `dot dot-${type} pulse` : `dot dot-${type}`;
+            return `<span class="${cls}"></span>`;
+        }
+
+        function indicator(type, text, pulsing = false) {
+            return `<span class="indicator">${dot(type, pulsing)} ${text}</span>`;
+        }
+
+        function serviceStatus(val) {
+            if (val === 'active' || val === 'listening') return indicator('ok', ok(val), true);
+            if (val === 'inactive') return indicator('bad', bad(val));
+            return indicator('warn', warn(val));
+        }
+
+        function barColor(pct) {
+            if (pct < 60) return 'var(--accent)';
+            if (pct < 80) return 'var(--amber)';
+            return 'var(--red)';
+        }
+
+        function bar(pct) {
+            return `<div class="bar-container"><div class="bar-fill" style="width:${pct}%;background:${barColor(pct)}"></div></div>`;
+        }
+
+        function row(label, value) {
+            return `<div class="status-row"><span class="status-label">${label}</span><span class="status-value">${value}</span></div>`;
+        }
+
+        // ── Render ──
+        function render(d) {
+            const s = d.security;
+            const sys = d.system;
+            const svc = d.services;
+            const ssl = d.ssl;
+            const bk = d.backups;
+            const tr = d.traffic;
+
+            // SSL status
+            let sslStatus;
+            if (ssl.days_left > 30) sslStatus = indicator('ok', ok(`${ssl.days_left} days left`));
+            else if (ssl.days_left > 7) sslStatus = indicator('warn', warn(`${ssl.days_left} days left`));
+            else if (ssl.days_left > 0) sslStatus = indicator('bad', bad(`${ssl.days_left} days left!`));
+            else sslStatus = indicator('bad', bad('unknown'));
+
+            // SSH checks
+            const sshPw = s.ssh.password_auth === 'no'
+                ? indicator('ok', ok('disabled'))
+                : indicator('bad', bad('ENABLED'));
+            const sshRoot = s.ssh.root_login === 'no'
+                ? indicator('ok', ok('disabled'))
+                : indicator('bad', bad('ENABLED'));
+
+            // Unattended
+            const uaStatus = s.unattended_upgrades === 'active'
+                ? indicator('ok', ok('active'))
+                : indicator('warn', warn(s.unattended_upgrades));
+
+            // Nginx hardening
+            const tokensOff = s.nginx_hardening.server_tokens_off
+                ? indicator('ok', ok('yes')) : indicator('bad', bad('no'));
+            const hiddenBlocked = s.nginx_hardening.hidden_files_blocked
+                ? indicator('ok', ok('yes')) : indicator('bad', bad('no'));
+
+            // Fail2ban
+            const f2bStatus = s.fail2ban.running
+                ? indicator('ok', ok('active'), true)
+                : indicator('bad', bad('down'));
+
+            // Memory bar color class
+            const memPct = sys.memory.percent;
+            const diskPct = sys.disk.percent;
+
+            // Top pages
+            let pagesHtml = '';
+            if (tr.top_pages && tr.top_pages.length > 0) {
+                pagesHtml = tr.top_pages.map(p =>
+                    `<div class="pages-table-row">
+                        <span class="pages-path">${p.path}</span>
+                        <span class="pages-count">${p.count}</span>
+                    </div>`
+                ).join('');
+            } else {
+                pagesHtml = `<div style="color:var(--text-faint);font-size:13px;">no data yet</div>`;
+            }
+
+            // Banned IPs
+            let bannedHtml = '';
+            if (s.fail2ban.banned_ips && s.fail2ban.banned_ips.trim()) {
+                bannedHtml = `<div class="banned-list">banned: ${s.fail2ban.banned_ips}</div>`;
+            }
+
+            const html = `
+                <div class="grid">
+                    <!-- Services -->
+                    <div class="card">
+                        <div class="card-title">services</div>
+                        ${row('nginx', serviceStatus(svc.nginx))}
+                        ${row('webhook (systemd)', serviceStatus(svc.webhook))}
+                        ${row('node :3100', serviceStatus(svc.node_port_3100))}
+                        ${row('ssl certificate', sslStatus)}
+                    </div>
+
+                    <!-- System -->
+                    <div class="card">
+                        <div class="card-title">system</div>
+                        ${row('uptime', `<span class="ok">${sys.uptime}</span>`)}
+                        ${row('load (1/5/15)', sys.load.join(' / '))}
+                        ${row('memory', `${sys.memory.used_mb}/${sys.memory.total_mb} MB (${memPct}%)`)}
+                        ${bar(memPct)}
+                        <div style="height:8px"></div>
+                        ${row('disk', `${sys.disk.used}/${sys.disk.total} (${diskPct}%)`)}
+                        ${bar(diskPct)}
+                    </div>
+
+                    <!-- Security -->
+                    <div class="card">
+                        <div class="card-title">security</div>
+                        ${row('ufw firewall', s.ufw.status === 'active' ? indicator('ok', ok('active'), true) : indicator('bad', bad(s.ufw.status)))}
+                        ${row('open ports', s.ufw.open_ports || 'none')}
+                        ${row('password auth', sshPw)}
+                        ${row('root login', sshRoot)}
+                        ${row('unattended upgrades', uaStatus)}
+                        ${row('server_tokens off', tokensOff)}
+                        ${row('hidden files blocked', hiddenBlocked)}
+                    </div>
+
+                    <!-- Fail2ban -->
+                    <div class="card">
+                        <div class="card-title">fail2ban · sshd</div>
+                        ${row('status', f2bStatus)}
+                        ${row('currently banned', s.fail2ban.current_banned > 0
+                            ? `<span class="warn">${s.fail2ban.current_banned}</span>`
+                            : ok('0')
+                        )}
+                        ${row('total banned (all time)', String(s.fail2ban.total_banned))}
+                        ${row('auth failures (24h)', s.auth_failures_24h > 10
+                            ? `<span class="warn">${s.auth_failures_24h}</span>`
+                            : String(s.auth_failures_24h)
+                        )}
+                        ${bannedHtml}
+                    </div>
+
+                    <!-- Traffic -->
+                    <div class="card">
+                        <div class="card-title">traffic · goatcounter</div>
+                        ${row('today views', `<span class="ok">${tr.today.views}</span>`)}
+                        ${row('today visitors', String(tr.today.visitors))}
+                        ${row('7-day views', `<span class="ok">${tr.week.views}</span>`)}
+                        ${row('7-day visitors', String(tr.week.visitors))}
+                    </div>
+
+                    <!-- Backups -->
+                    <div class="card">
+                        <div class="card-title">maintenance</div>
+                        ${row('last backup', bk.last_backup)}
+                        ${row('last healthcheck', bk.last_healthcheck)}
+                    </div>
+
+                    <!-- Top Pages -->
+                    <div class="card grid-full">
+                        <div class="card-title">top pages · last 7 days</div>
+                        <div class="pages-table">${pagesHtml}</div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('dashboard-content').innerHTML = html;
+        }
+
+        // ── Fetch ──
+        let lastFetch = null;
+
+        async function fetchStatus() {
+            try {
+                const resp = await fetch('data.json?t=' + Date.now());
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const data = await resp.json();
+
+                document.getElementById('collected-at').innerHTML =
+                    `last collected: <span>${data.local_time}</span>`;
+
+                render(data);
+                lastFetch = new Date();
+                document.getElementById('refresh-info').textContent =
+                    'updated ' + lastFetch.toLocaleTimeString();
+            } catch (err) {
+                document.getElementById('dashboard-content').innerHTML =
+                    `<div class="error-msg">
+                        failed to load status data<br>
+                        <span style="font-size:12px;color:var(--text-faint)">${err.message}</span><br>
+                        <span style="font-size:12px;color:var(--text-faint)">has status-collector.sh run yet?</span>
+                    </div>`;
+            }
+        }
+
+        // Initial load + refresh every 5 min
+        fetchStatus();
+        setInterval(fetchStatus, 5 * 60 * 1000);
+    </script>
 </body>
 </html>
