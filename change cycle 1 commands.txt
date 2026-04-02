@@ -1,8 +1,25 @@
+example of updating: 
+Local:
+cd ~/tabtools 
+git add .
+git commit -m "Add favicon, robots.txt, custom 404, update README"
+git push
+
+Server:
+cd /var/www/tabtools.dev
+git pull
+
+
+
+
+
+
 Same cycle. On your Mac:
 
 ```bash
 cd ~/tabtools
 nano site/index.html
+nano site/tools/cron-builder/index.html
 ```
 
 Fix the typo, save, then:
