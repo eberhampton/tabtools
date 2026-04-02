@@ -2,7 +2,8 @@ example of updating:
 Local:
 cd ~/tabtools 
 git add .
-git commit -m "Add favicon, robots.txt, custom 404, update README"
+
+Add favicon, robots.txt, custom 404, update README"
 git push
 
 Server:
