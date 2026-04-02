@@ -36,7 +36,6 @@ disk_percent=$(df / | awk 'NR==2{print $5}' | tr -d '%')
 nginx_active=$(systemctl is-active nginx 2>/dev/null)
 webhook_active=$(systemctl is-active tabtools-webhook 2>/dev/null)
 
-# Check if node is listening on port 3100
 node_port=$(ss -tlnp | grep -c ":3100 " 2>/dev/null)
 if [ "$node_port" -gt 0 ]; then
     node_status="listening"
@@ -58,8 +57,6 @@ fi
 
 # ── Security: UFW ──
 ufw_status=$(sudo ufw status | head -1 | awk '{print $2}')
-ufw_rules=$(sudo ufw status | grep -E "^[0-9]" | awk '{print $1}' | sort -u | tr '\n' ',' | sed 's/,$//')
-# Get ports in a cleaner way
 ufw_ports=$(sudo ufw status | grep "ALLOW" | awk '{print $1}' | sort -u | tr '\n' ',' | sed 's/,$//')
 
 # ── Security: Fail2ban ──
@@ -81,13 +78,12 @@ fi
 # ── Security: SSH config ──
 ssh_password=$(grep -E "^PasswordAuthentication" /etc/ssh/sshd_config 2>/dev/null | awk '{print $2}')
 ssh_root=$(grep -E "^PermitRootLogin" /etc/ssh/sshd_config 2>/dev/null | awk '{print $2}')
-[ -z "$ssh_password" ] && ssh_password="yes"  # default if not set
-[ -z "$ssh_root" ] && ssh_root="yes"          # default if not set
+[ -z "$ssh_password" ] && ssh_password="yes"
+[ -z "$ssh_root" ] && ssh_root="yes"
 
 # ── Security: Unattended upgrades ──
 if dpkg -l | grep -q unattended-upgrades 2>/dev/null; then
     unattended="installed"
-    # Check if enabled in config
     if grep -q "1" /etc/apt/apt.conf.d/20auto-upgrades 2>/dev/null; then
         unattended="active"
     fi
@@ -98,15 +94,12 @@ fi
 # ── Security: nginx hardening ──
 nginx_conf="/etc/nginx/sites-enabled/tabtools.dev"
 nginx_tokens=$(grep -c "server_tokens off" "$nginx_conf" 2>/dev/null)
-nginx_hidden=$(grep -c 'location ~ /\.' "$nginx_conf" 2>/dev/null)
+# fgrep avoids shell backslash escaping issues
+nginx_hidden=$(fgrep -c 'location ~ /\.' "$nginx_conf" 2>/dev/null)
 
 # ── Backup & healthcheck timestamps ──
 last_backup="never"
 if [ -f /home/eber/backup.log ]; then
-    last_backup_line=$(grep -E "^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)|Backup completed|^\[" /home/eber/backup.log | tail -1)
-    if [ -n "$last_backup_line" ]; then
-        last_backup="$last_backup_line"
-    fi
     last_backup_time=$(stat -c %Y /home/eber/backup.log 2>/dev/null)
     if [ -n "$last_backup_time" ]; then
         last_backup=$(date -d @"$last_backup_time" +"%Y-%m-%d %H:%M:%S")
@@ -114,73 +107,72 @@ if [ -f /home/eber/backup.log ]; then
 fi
 
 last_healthcheck="never"
-if [ -f /home/eber/healthcheck.sh ]; then
-    # Use the log or last modified time of a healthcheck output
-    hc_log=$(find /home/eber -name "healthcheck*.log" -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -1 | awk '{print $2}')
-    if [ -n "$hc_log" ]; then
-        hc_time=$(stat -c %Y "$hc_log" 2>/dev/null)
-        last_healthcheck=$(date -d @"$hc_time" +"%Y-%m-%d %H:%M:%S")
+for logfile in /home/eber/healthcheck.log /home/eber/healthcheck-results.log; do
+    if [ -f "$logfile" ]; then
+        hc_time=$(stat -c %Y "$logfile" 2>/dev/null)
+        if [ -n "$hc_time" ]; then
+            last_healthcheck=$(date -d @"$hc_time" +"%Y-%m-%d %H:%M:%S")
+            break
+        fi
     fi
+done
+if [ "$last_healthcheck" = "never" ] && [ -f /home/eber/healthcheck.sh ]; then
+    last_healthcheck="no log found"
 fi
 
 # ── GoatCounter traffic ──
-gc_total_views=""
-gc_total_visitors=""
-gc_today_views=""
-gc_today_visitors=""
-gc_pages_json="[]"
+gc_total_views=0
+gc_today_views=0
+gc_daily_json="[]"
+gc_paths_json="[]"
 
 if [ -n "$GOATCOUNTER_KEY" ]; then
-    # Get total stats for last 7 days
-    gc_week=$(curl -s --max-time 10 \
+    # /api/v0/stats/total returns:
+    #   { "total": N, "total_utc": N, "stats": [{"day":"YYYY-MM-DD","daily":N,"hourly":[...]}, ...] }
+    gc_raw=$(curl -s --max-time 10 \
         -H "Content-Type: application/json" \
         -H "Authorization: Bearer $GOATCOUNTER_KEY" \
-        "https://${GOATCOUNTER_SITE}.goatcounter.com/api/v0/stats/total?period-start=$(date -d '7 days ago' +%Y-%m-%d)&period-end=$(date +%Y-%m-%d)" 2>/dev/null)
+        "https://${GOATCOUNTER_SITE}.goatcounter.com/api/v0/stats/total" 2>/dev/null)
 
-    if echo "$gc_week" | python3 -c "import sys,json; json.load(sys.stdin)" 2>/dev/null; then
-        gc_total_views=$(echo "$gc_week" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('total',{}).get('total_count',0))" 2>/dev/null)
-        gc_total_visitors=$(echo "$gc_week" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('total',{}).get('total_unique',0))" 2>/dev/null)
-    fi
-
-    # Get today's stats
-    gc_today=$(curl -s --max-time 10 \
-        -H "Content-Type: application/json" \
-        -H "Authorization: Bearer $GOATCOUNTER_KEY" \
-        "https://${GOATCOUNTER_SITE}.goatcounter.com/api/v0/stats/total?period-start=$(date +%Y-%m-%d)&period-end=$(date +%Y-%m-%d)" 2>/dev/null)
-
-    if echo "$gc_today" | python3 -c "import sys,json; json.load(sys.stdin)" 2>/dev/null; then
-        gc_today_views=$(echo "$gc_today" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('total',{}).get('total_count',0))" 2>/dev/null)
-        gc_today_visitors=$(echo "$gc_today" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('total',{}).get('total_unique',0))" 2>/dev/null)
-    fi
-
-    # Get top pages for last 7 days
-    gc_pages_raw=$(curl -s --max-time 10 \
-        -H "Content-Type: application/json" \
-        -H "Authorization: Bearer $GOATCOUNTER_KEY" \
-        "https://${GOATCOUNTER_SITE}.goatcounter.com/api/v0/stats/pages?period-start=$(date -d '7 days ago' +%Y-%m-%d)&period-end=$(date +%Y-%m-%d)&limit=10" 2>/dev/null)
-
-    if echo "$gc_pages_raw" | python3 -c "import sys,json; json.load(sys.stdin)" 2>/dev/null; then
-        gc_pages_json=$(echo "$gc_pages_raw" | python3 -c "
+    if echo "$gc_raw" | python3 -c "import sys,json; json.load(sys.stdin)" 2>/dev/null; then
+        gc_parsed=$(echo "$gc_raw" | python3 -c "
 import sys, json
 data = json.load(sys.stdin)
-pages = data.get('paths', data.get('rows', []))
-result = []
-for p in pages[:10]:
-    result.append({
-        'path': p.get('path', p.get('name', '?')),
-        'title': p.get('title', ''),
-        'count': p.get('count', 0)
-    })
+total = data.get('total', 0)
+stats = data.get('stats', [])
+today = stats[-1]['daily'] if stats else 0
+daily = [{'day': s['day'], 'views': s.get('daily', 0)} for s in stats]
+print(json.dumps({'total': total, 'today': today, 'daily': daily}))
+" 2>/dev/null)
+
+        if [ -n "$gc_parsed" ]; then
+            gc_total_views=$(echo "$gc_parsed" | python3 -c "import sys,json; print(json.load(sys.stdin)['total'])" 2>/dev/null)
+            gc_today_views=$(echo "$gc_parsed" | python3 -c "import sys,json; print(json.load(sys.stdin)['today'])" 2>/dev/null)
+            gc_daily_json=$(echo "$gc_parsed" | python3 -c "import sys,json; print(json.dumps(json.load(sys.stdin)['daily']))" 2>/dev/null)
+        fi
+    fi
+
+    [ -z "$gc_total_views" ] && gc_total_views=0
+    [ -z "$gc_today_views" ] && gc_today_views=0
+    [ -z "$gc_daily_json" ] && gc_daily_json="[]"
+
+    # /api/v0/paths returns list of tracked paths (no per-page counts)
+    gc_paths_raw=$(curl -s --max-time 10 \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer $GOATCOUNTER_KEY" \
+        "https://${GOATCOUNTER_SITE}.goatcounter.com/api/v0/paths" 2>/dev/null)
+
+    if echo "$gc_paths_raw" | python3 -c "import sys,json; json.load(sys.stdin)" 2>/dev/null; then
+        gc_paths_json=$(echo "$gc_paths_raw" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+paths = data.get('paths', [])
+result = [{'path': p.get('path',''), 'title': p.get('title','')} for p in paths]
 print(json.dumps(result))
 " 2>/dev/null)
-        [ -z "$gc_pages_json" ] && gc_pages_json="[]"
+        [ -z "$gc_paths_json" ] && gc_paths_json="[]"
     fi
 fi
-
-[ -z "$gc_total_views" ] && gc_total_views=0
-[ -z "$gc_total_visitors" ] && gc_total_visitors=0
-[ -z "$gc_today_views" ] && gc_today_views=0
-[ -z "$gc_today_visitors" ] && gc_today_visitors=0
 
 # ── Recent auth failures (last 24h) ──
 auth_failures=0
@@ -246,15 +238,10 @@ cat > "$OUTPUT_FILE" << ENDJSON
     "last_healthcheck": "$last_healthcheck"
   },
   "traffic": {
-    "week": {
-      "views": $gc_total_views,
-      "visitors": $gc_total_visitors
-    },
-    "today": {
-      "views": $gc_today_views,
-      "visitors": $gc_today_visitors
-    },
-    "top_pages": $gc_pages_json
+    "total_views": $gc_total_views,
+    "today_views": $gc_today_views,
+    "daily": $gc_daily_json,
+    "tracked_paths": $gc_paths_json
   }
 }
 ENDJSON

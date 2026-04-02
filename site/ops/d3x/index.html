@@ -6,7 +6,6 @@
     <meta name="robots" content="noindex, nofollow">
     <title>ops — tabtools.dev</title>
     <style>
-        /* ── tabtools.dev design system ── */
         :root {
             --bg-primary: #0d0d0d;
             --surface: #161616;
@@ -51,7 +50,6 @@
             line-height: 1.5;
         }
 
-        /* ── Header ── */
         .header {
             display: flex;
             justify-content: space-between;
@@ -60,21 +58,12 @@
             border-bottom: 1px solid var(--border-panel);
         }
 
-        .logo {
-            font-size: 18px;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
+        .logo { font-size: 18px; font-weight: bold; letter-spacing: 1px; }
         .logo .tab { color: var(--text-primary); }
         .logo .tools { color: var(--accent); }
         .logo .ops { color: var(--text-faint); font-weight: normal; }
 
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
+        .header-right { display: flex; align-items: center; gap: 16px; }
 
         .theme-toggle {
             background: none;
@@ -87,20 +76,11 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-
         .theme-toggle:hover { color: var(--text-primary); }
 
-        .refresh-info {
-            font-size: 11px;
-            color: var(--text-faint);
-        }
+        .refresh-info { font-size: 11px; color: var(--text-faint); }
 
-        /* ── Main ── */
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 24px;
-        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
 
         .page-title {
             font-size: 13px;
@@ -110,31 +90,19 @@
             margin-bottom: 8px;
         }
 
-        .collected-at {
-            font-size: 12px;
-            color: var(--text-faint);
-            margin-bottom: 24px;
-        }
-
+        .collected-at { font-size: 12px; color: var(--text-faint); margin-bottom: 24px; }
         .collected-at span { color: var(--amber); }
 
-        /* ── Grid ── */
         .grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 16px;
             margin-bottom: 16px;
         }
+        .grid-full { grid-column: 1 / -1; }
 
-        .grid-full {
-            grid-column: 1 / -1;
-        }
+        @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
 
-        @media (max-width: 700px) {
-            .grid { grid-template-columns: 1fr; }
-        }
-
-        /* ── Card ── */
         .card {
             background: var(--surface);
             border: 1px solid var(--border-panel);
@@ -152,7 +120,6 @@
             border-bottom: 1px solid var(--border-subtle);
         }
 
-        /* ── Status rows ── */
         .status-row {
             display: flex;
             justify-content: space-between;
@@ -160,98 +127,119 @@
             padding: 6px 0;
             font-size: 13px;
         }
+        .status-row + .status-row { border-top: 1px solid var(--border-subtle); }
+        .status-label { color: var(--text-muted); }
+        .status-value { color: var(--text-primary); text-align: right; }
 
-        .status-row + .status-row {
-            border-top: 1px solid var(--border-subtle);
-        }
-
-        .status-label {
-            color: var(--text-muted);
-        }
-
-        .status-value {
-            color: var(--text-primary);
-            text-align: right;
-        }
-
-        /* ── Indicators ── */
         .ok { color: var(--accent); }
         .warn { color: var(--amber); }
         .bad { color: var(--red); }
 
-        .indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
+        .indicator { display: inline-flex; align-items: center; gap: 6px; }
 
         .dot {
-            width: 7px;
-            height: 7px;
+            width: 7px; height: 7px;
             border-radius: 50%;
             display: inline-block;
         }
-
         .dot-ok { background: var(--accent); }
         .dot-warn { background: var(--amber); }
         .dot-bad { background: var(--red); }
-
-        .dot-ok.pulse {
-            animation: pulse-green 2s ease-in-out infinite;
-        }
+        .dot-ok.pulse { animation: pulse-green 2s ease-in-out infinite; }
 
         @keyframes pulse-green {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.4; }
         }
 
-        /* ── Bar ── */
         .bar-container {
-            width: 100%;
-            height: 6px;
+            width: 100%; height: 6px;
             background: var(--border-panel);
             border-radius: 2px;
             margin-top: 6px;
         }
-
         .bar-fill {
             height: 100%;
             border-radius: 2px;
             transition: width 0.4s ease;
         }
 
-        /* ── Top pages table ── */
-        .pages-table {
-            width: 100%;
-            font-size: 13px;
+        /* ── Daily chart ── */
+        .chart-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 80px;
+            padding-top: 8px;
         }
 
-        .pages-table-row {
+        .chart-bar-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+        }
+
+        .chart-bar-track {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .chart-bar {
+            width: 100%;
+            max-width: 48px;
+            background: var(--accent);
+            border-radius: 2px 2px 0 0;
+            min-height: 2px;
+            transition: height 0.4s ease;
+            opacity: 0.85;
+        }
+
+        .chart-bar:hover { opacity: 1; }
+
+        .chart-label {
+            font-size: 10px;
+            color: var(--text-faint);
+            margin-top: 4px;
+            white-space: nowrap;
+        }
+
+        .chart-value {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        /* ── Paths list ── */
+        .paths-row {
             display: flex;
             justify-content: space-between;
             padding: 5px 0;
+            font-size: 13px;
         }
-
-        .pages-table-row + .pages-table-row {
-            border-top: 1px solid var(--border-subtle);
-        }
-
-        .pages-path {
+        .paths-row + .paths-row { border-top: 1px solid var(--border-subtle); }
+        .paths-path {
             color: var(--text-secondary);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
             flex: 1;
-            margin-right: 16px;
         }
-
-        .pages-count {
-            color: var(--accent);
+        .paths-title {
+            color: var(--text-faint);
+            font-size: 11px;
+            overflow: hidden;
+            text-overflow: ellipsis;
             white-space: nowrap;
-            font-variant-numeric: tabular-nums;
+            margin-left: 12px;
+            max-width: 50%;
+            text-align: right;
         }
 
-        /* ── Banned IPs ── */
         .banned-list {
             font-size: 12px;
             color: var(--text-muted);
@@ -259,7 +247,6 @@
             word-break: break-all;
         }
 
-        /* ── Loading / Error ── */
         .loading {
             text-align: center;
             padding: 60px 20px;
@@ -274,7 +261,6 @@
             font-size: 14px;
         }
 
-        /* ── Footer ── */
         .footer {
             padding: 16px 24px;
             text-align: center;
@@ -282,6 +268,30 @@
             color: var(--text-faint);
             border-top: 1px solid var(--border-subtle);
             margin-top: 32px;
+        }
+
+        /* ── Traffic big numbers ── */
+        .traffic-stats {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+        .traffic-stat {
+            display: flex;
+            flex-direction: column;
+        }
+        .traffic-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--accent);
+            line-height: 1;
+        }
+        .traffic-label {
+            font-size: 11px;
+            color: var(--text-faint);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
         }
     </style>
 </head>
@@ -300,22 +310,17 @@
     <div class="container">
         <div class="page-title">system status</div>
         <div class="collected-at" id="collected-at">loading...</div>
-
         <div id="dashboard-content">
             <div class="loading">collecting status data...</div>
         </div>
     </div>
 
-    <div class="footer">
-        unlisted · auto-refreshes every 5 minutes
-    </div>
+    <div class="footer">unlisted · auto-refreshes every 5 minutes</div>
 
     <script>
-        // ── Theme ──
         function toggleTheme() {
             const html = document.documentElement;
-            const current = html.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';
+            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
             html.setAttribute('data-theme', next);
             localStorage.setItem('tabtools-theme', next);
             document.getElementById('theme-toggle').textContent = next === 'dark' ? 'light' : 'dark';
@@ -329,21 +334,19 @@
             }
         })();
 
-        // ── Helpers ──
-        function ok(text) { return `<span class="ok">${text}</span>`; }
-        function warn(text) { return `<span class="warn">${text}</span>`; }
-        function bad(text) { return `<span class="bad">${text}</span>`; }
+        function ok(t) { return `<span class="ok">${t}</span>`; }
+        function warn(t) { return `<span class="warn">${t}</span>`; }
+        function bad(t) { return `<span class="bad">${t}</span>`; }
 
         function dot(type, pulsing) {
-            const cls = pulsing ? `dot dot-${type} pulse` : `dot dot-${type}`;
-            return `<span class="${cls}"></span>`;
+            return `<span class="dot dot-${type}${pulsing ? ' pulse' : ''}"></span>`;
         }
 
-        function indicator(type, text, pulsing = false) {
+        function indicator(type, text, pulsing) {
             return `<span class="indicator">${dot(type, pulsing)} ${text}</span>`;
         }
 
-        function serviceStatus(val) {
+        function svcStatus(val) {
             if (val === 'active' || val === 'listening') return indicator('ok', ok(val), true);
             if (val === 'inactive') return indicator('bad', bad(val));
             return indicator('warn', warn(val));
@@ -363,7 +366,22 @@
             return `<div class="status-row"><span class="status-label">${label}</span><span class="status-value">${value}</span></div>`;
         }
 
-        // ── Render ──
+        function buildChart(daily) {
+            if (!daily || daily.length === 0) return '<div style="color:var(--text-faint);font-size:13px;">no data</div>';
+            const max = Math.max(...daily.map(d => d.views), 1);
+            return '<div class="chart-container">' + daily.map(d => {
+                const pct = (d.views / max) * 100;
+                const label = d.day.slice(5); // MM-DD
+                return `<div class="chart-bar-wrap">
+                    <div class="chart-value">${d.views}</div>
+                    <div class="chart-bar-track">
+                        <div class="chart-bar" style="height:${Math.max(pct, 3)}%" title="${d.day}: ${d.views} views"></div>
+                    </div>
+                    <div class="chart-label">${label}</div>
+                </div>`;
+            }).join('') + '</div>';
+        }
+
         function render(d) {
             const s = d.security;
             const sys = d.system;
@@ -372,84 +390,58 @@
             const bk = d.backups;
             const tr = d.traffic;
 
-            // SSL status
             let sslStatus;
             if (ssl.days_left > 30) sslStatus = indicator('ok', ok(`${ssl.days_left} days left`));
             else if (ssl.days_left > 7) sslStatus = indicator('warn', warn(`${ssl.days_left} days left`));
             else if (ssl.days_left > 0) sslStatus = indicator('bad', bad(`${ssl.days_left} days left!`));
             else sslStatus = indicator('bad', bad('unknown'));
 
-            // SSH checks
-            const sshPw = s.ssh.password_auth === 'no'
-                ? indicator('ok', ok('disabled'))
-                : indicator('bad', bad('ENABLED'));
-            const sshRoot = s.ssh.root_login === 'no'
-                ? indicator('ok', ok('disabled'))
-                : indicator('bad', bad('ENABLED'));
+            const sshPw = s.ssh.password_auth === 'no' ? indicator('ok', ok('disabled')) : indicator('bad', bad('ENABLED'));
+            const sshRoot = s.ssh.root_login === 'no' ? indicator('ok', ok('disabled')) : indicator('bad', bad('ENABLED'));
+            const uaStatus = s.unattended_upgrades === 'active' ? indicator('ok', ok('active')) : indicator('warn', warn(s.unattended_upgrades));
+            const tokensOff = s.nginx_hardening.server_tokens_off ? indicator('ok', ok('yes')) : indicator('bad', bad('no'));
+            const hiddenBlocked = s.nginx_hardening.hidden_files_blocked ? indicator('ok', ok('yes')) : indicator('bad', bad('no'));
+            const f2bStatus = s.fail2ban.running ? indicator('ok', ok('active'), true) : indicator('bad', bad('down'));
 
-            // Unattended
-            const uaStatus = s.unattended_upgrades === 'active'
-                ? indicator('ok', ok('active'))
-                : indicator('warn', warn(s.unattended_upgrades));
-
-            // Nginx hardening
-            const tokensOff = s.nginx_hardening.server_tokens_off
-                ? indicator('ok', ok('yes')) : indicator('bad', bad('no'));
-            const hiddenBlocked = s.nginx_hardening.hidden_files_blocked
-                ? indicator('ok', ok('yes')) : indicator('bad', bad('no'));
-
-            // Fail2ban
-            const f2bStatus = s.fail2ban.running
-                ? indicator('ok', ok('active'), true)
-                : indicator('bad', bad('down'));
-
-            // Memory bar color class
-            const memPct = sys.memory.percent;
-            const diskPct = sys.disk.percent;
-
-            // Top pages
-            let pagesHtml = '';
-            if (tr.top_pages && tr.top_pages.length > 0) {
-                pagesHtml = tr.top_pages.map(p =>
-                    `<div class="pages-table-row">
-                        <span class="pages-path">${p.path}</span>
-                        <span class="pages-count">${p.count}</span>
-                    </div>`
-                ).join('');
-            } else {
-                pagesHtml = `<div style="color:var(--text-faint);font-size:13px;">no data yet</div>`;
-            }
-
-            // Banned IPs
             let bannedHtml = '';
             if (s.fail2ban.banned_ips && s.fail2ban.banned_ips.trim()) {
                 bannedHtml = `<div class="banned-list">banned: ${s.fail2ban.banned_ips}</div>`;
             }
 
-            const html = `
+            // Tracked paths
+            let pathsHtml = '';
+            if (tr.tracked_paths && tr.tracked_paths.length > 0) {
+                pathsHtml = tr.tracked_paths.map(p =>
+                    `<div class="paths-row">
+                        <span class="paths-path">${p.path}</span>
+                        <span class="paths-title">${p.title.split(' — ')[0] || ''}</span>
+                    </div>`
+                ).join('');
+            } else {
+                pathsHtml = '<div style="color:var(--text-faint);font-size:13px;">no paths tracked</div>';
+            }
+
+            document.getElementById('dashboard-content').innerHTML = `
                 <div class="grid">
-                    <!-- Services -->
                     <div class="card">
                         <div class="card-title">services</div>
-                        ${row('nginx', serviceStatus(svc.nginx))}
-                        ${row('webhook (systemd)', serviceStatus(svc.webhook))}
-                        ${row('node :3100', serviceStatus(svc.node_port_3100))}
+                        ${row('nginx', svcStatus(svc.nginx))}
+                        ${row('webhook (systemd)', svcStatus(svc.webhook))}
+                        ${row('node :3100', svcStatus(svc.node_port_3100))}
                         ${row('ssl certificate', sslStatus)}
                     </div>
 
-                    <!-- System -->
                     <div class="card">
                         <div class="card-title">system</div>
-                        ${row('uptime', `<span class="ok">${sys.uptime}</span>`)}
+                        ${row('uptime', ok(sys.uptime))}
                         ${row('load (1/5/15)', sys.load.join(' / '))}
-                        ${row('memory', `${sys.memory.used_mb}/${sys.memory.total_mb} MB (${memPct}%)`)}
-                        ${bar(memPct)}
+                        ${row('memory', `${sys.memory.used_mb}/${sys.memory.total_mb} MB (${sys.memory.percent}%)`)}
+                        ${bar(sys.memory.percent)}
                         <div style="height:8px"></div>
-                        ${row('disk', `${sys.disk.used}/${sys.disk.total} (${diskPct}%)`)}
-                        ${bar(diskPct)}
+                        ${row('disk', `${sys.disk.used}/${sys.disk.total} (${sys.disk.percent}%)`)}
+                        ${bar(sys.disk.percent)}
                     </div>
 
-                    <!-- Security -->
                     <div class="card">
                         <div class="card-title">security</div>
                         ${row('ufw firewall', s.ufw.status === 'active' ? indicator('ok', ok('active'), true) : indicator('bad', bad(s.ufw.status)))}
@@ -461,65 +453,60 @@
                         ${row('hidden files blocked', hiddenBlocked)}
                     </div>
 
-                    <!-- Fail2ban -->
                     <div class="card">
                         <div class="card-title">fail2ban · sshd</div>
                         ${row('status', f2bStatus)}
                         ${row('currently banned', s.fail2ban.current_banned > 0
-                            ? `<span class="warn">${s.fail2ban.current_banned}</span>`
+                            ? warn(s.fail2ban.current_banned)
                             : ok('0')
                         )}
                         ${row('total banned (all time)', String(s.fail2ban.total_banned))}
                         ${row('auth failures (24h)', s.auth_failures_24h > 10
-                            ? `<span class="warn">${s.auth_failures_24h}</span>`
+                            ? warn(s.auth_failures_24h)
                             : String(s.auth_failures_24h)
                         )}
                         ${bannedHtml}
                     </div>
 
-                    <!-- Traffic -->
-                    <div class="card">
+                    <div class="card grid-full">
                         <div class="card-title">traffic · goatcounter</div>
-                        ${row('today views', `<span class="ok">${tr.today.views}</span>`)}
-                        ${row('today visitors', String(tr.today.visitors))}
-                        ${row('7-day views', `<span class="ok">${tr.week.views}</span>`)}
-                        ${row('7-day visitors', String(tr.week.visitors))}
+                        <div class="traffic-stats">
+                            <div class="traffic-stat">
+                                <span class="traffic-number">${tr.today_views}</span>
+                                <span class="traffic-label">today</span>
+                            </div>
+                            <div class="traffic-stat">
+                                <span class="traffic-number">${tr.total_views}</span>
+                                <span class="traffic-label">last 7 days</span>
+                            </div>
+                        </div>
+                        ${buildChart(tr.daily)}
                     </div>
 
-                    <!-- Backups -->
+                    <div class="card">
+                        <div class="card-title">tracked paths</div>
+                        ${pathsHtml}
+                    </div>
+
                     <div class="card">
                         <div class="card-title">maintenance</div>
                         ${row('last backup', bk.last_backup)}
                         ${row('last healthcheck', bk.last_healthcheck)}
                     </div>
-
-                    <!-- Top Pages -->
-                    <div class="card grid-full">
-                        <div class="card-title">top pages · last 7 days</div>
-                        <div class="pages-table">${pagesHtml}</div>
-                    </div>
                 </div>
             `;
-
-            document.getElementById('dashboard-content').innerHTML = html;
         }
-
-        // ── Fetch ──
-        let lastFetch = null;
 
         async function fetchStatus() {
             try {
                 const resp = await fetch('data.json?t=' + Date.now());
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                 const data = await resp.json();
-
                 document.getElementById('collected-at').innerHTML =
                     `last collected: <span>${data.local_time}</span>`;
-
                 render(data);
-                lastFetch = new Date();
                 document.getElementById('refresh-info').textContent =
-                    'updated ' + lastFetch.toLocaleTimeString();
+                    'updated ' + new Date().toLocaleTimeString();
             } catch (err) {
                 document.getElementById('dashboard-content').innerHTML =
                     `<div class="error-msg">
@@ -530,7 +517,6 @@
             }
         }
 
-        // Initial load + refresh every 5 min
         fetchStatus();
         setInterval(fetchStatus, 5 * 60 * 1000);
     </script>
