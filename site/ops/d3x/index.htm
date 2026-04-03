@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>ops — tabtools.dev</title>
+    <style>
+        :root {
+            --bg-primary: #0d0d0d;
+            --surface: #161616;
+            --deep-surface: #0d0d0d;
+            --border-panel: #252525;
+            --border-subtle: #1a1a1a;
+            --border-button: #333;
+            --text-primary: #f5f5f5;
+            --text-secondary: #c0c0c0;
+            --text-muted: #a0a0a0;
+            --text-faint: #808080;
+            --accent: #6ee7b7;
+            --amber: #f5a01f;
+            --red: #ef4444;
+            --indigo: #818cf8;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f5f5f0;
+            --surface: #ffffff;
+            --deep-surface: #f5f5f0;
+            --border-panel: #d4d4d4;
+            --border-subtle: #e5e5e0;
+            --border-button: #c0c0c0;
+            --text-primary: #1a1a1a;
+            --text-secondary: #404040;
+            --text-muted: #606060;
+            --text-faint: #909090;
+            --accent: #059669;
+            --amber: #b45309;
+            --red: #dc2626;
+            --indigo: #6d28d9;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-panel);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .logo { font-size: 18px; font-weight: bold; letter-spacing: 1px; }
+        .logo .tab { color: var(--text-primary); }
+        .logo .tools { color: var(--accent); }
+        .logo .ops { color: var(--text-faint); font-weight: normal; }
+
+        .header-right { display: flex; align-items: center; gap: 16px; }
+
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border-button);
+            color: var(--text-muted);
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            padding: 6px 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            min-height: 32px;
+        }
+        .theme-toggle:hover { color: var(--text-primary); }
+
+        .refresh-info { font-size: 11px; color: var(--text-faint); }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+
+        .page-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+            margin-bottom: 8px;
+        }
+
+        .collected-at { font-size: 12px; color: var(--text-faint); margin-bottom: 24px; }
+        .collected-at span { color: var(--amber); }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .grid-full { grid-column: 1 / -1; }
+
+        @media (max-width: 700px) {
+            .grid { grid-template-columns: 1fr; }
+            .container { padding: 16px 12px; }
+            .header { padding: 12px 14px; }
+            .footer { padding: 12px 14px; }
+            .card { padding: 14px 14px; }
+            .status-row { font-size: 12px; gap: 8px; }
+            .status-label { min-width: 0; flex-shrink: 1; }
+            .status-value { flex-shrink: 0; }
+            .traffic-number { font-size: 24px; }
+            .traffic-label { font-size: 10px; }
+            .chart-container { height: 70px; gap: 2px; }
+            .chart-label { font-size: 8px; }
+            .chart-value { font-size: 8px; }
+            .paths-row { font-size: 12px; }
+            .paths-title { display: none; }
+            .refresh-info { display: none; }
+        }
+
+        @media (max-width: 400px) {
+            .container { padding: 12px 8px; }
+            .header { padding: 10px 10px; }
+            .card { padding: 12px 10px; }
+            .status-row { font-size: 11px; padding: 5px 0; }
+            .logo { font-size: 16px; }
+            .card-title { font-size: 10px; letter-spacing: 1.5px; }
+            .traffic-stats { gap: 16px; }
+            .traffic-number { font-size: 22px; }
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border-panel);
+            border-radius: 3px;
+            padding: 16px 20px;
+        }
+
+        .card-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            font-size: 13px;
+            gap: 12px;
+        }
+        .status-row + .status-row { border-top: 1px solid var(--border-subtle); }
+        .status-label { color: var(--text-muted); white-space: nowrap; }
+        .status-value { color: var(--text-primary); text-align: right; white-space: nowrap; }
+
+        .ok { color: var(--accent); }
+        .warn { color: var(--amber); }
+        .bad { color: var(--red); }
+
+        .indicator { display: inline-flex; align-items: center; gap: 6px; }
+
+        .dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .dot-ok { background: var(--accent); }
+        .dot-warn { background: var(--amber); }
+        .dot-bad { background: var(--red); }
+        .dot-ok.pulse { animation: pulse-green 2s ease-in-out infinite; }
+
+        @keyframes pulse-green {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .bar-container {
+            width: 100%; height: 6px;
+            background: var(--border-panel);
+            border-radius: 2px;
+            margin-top: 6px;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.4s ease;
+        }
+
+        /* ── Daily chart ── */
+        .chart-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 80px;
+            padding-top: 8px;
+            overflow-x: auto;
+            min-width: 0;
+        }
+
+        .chart-bar-wrap {
+            flex: 1;
+            min-width: 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+        }
+
+        .chart-bar-track {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .chart-bar {
+            width: 100%;
+            max-width: 48px;
+            background: var(--accent);
+            border-radius: 2px 2px 0 0;
+            min-height: 2px;
+            transition: height 0.4s ease;
+            opacity: 0.85;
+        }
+
+        .chart-bar:hover { opacity: 1; }
+
+        .chart-label {
+            font-size: 10px;
+            color: var(--text-faint);
+            margin-top: 4px;
+            white-space: nowrap;
+        }
+
+        .chart-value {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        /* ── Paths list ── */
+        .paths-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 13px;
+        }
+        .paths-row + .paths-row { border-top: 1px solid var(--border-subtle); }
+        .paths-path {
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+        }
+        .paths-title {
+            color: var(--text-faint);
+            font-size: 11px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-left: 12px;
+            max-width: 50%;
+            text-align: right;
+        }
+
+        .banned-list {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            word-break: break-all;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-faint);
+            font-size: 14px;
+        }
+
+        .error-msg {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--red);
+            font-size: 14px;
+        }
+
+        .footer {
+            padding: 16px 24px;
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-faint);
+            border-top: 1px solid var(--border-subtle);
+            margin-top: 32px;
+        }
+
+        /* ── Traffic big numbers ── */
+        .traffic-stats {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+        .traffic-stat {
+            display: flex;
+            flex-direction: column;
+        }
+        .traffic-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--accent);
+            line-height: 1;
+        }
+        .traffic-label {
+            font-size: 11px;
+            color: var(--text-faint);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <span class="tab">tab</span><span class="tools">tools</span>
+            <span class="ops"> /ops</span>
+        </div>
+        <div class="header-right">
+            <span class="refresh-info" id="refresh-info"></span>
+            <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">light</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="page-title">system status</div>
+        <div class="collected-at" id="collected-at">loading...</div>
+        <div id="dashboard-content">
+            <div class="loading">collecting status data...</div>
+        </div>
+    </div>
+
+    <div class="footer">unlisted · auto-refreshes every 5 minutes</div>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('tabtools-theme', next);
+            document.getElementById('theme-toggle').textContent = next === 'dark' ? 'light' : 'dark';
+        }
+
+        (function initTheme() {
+            const saved = localStorage.getItem('tabtools-theme');
+            if (saved) {
+                document.documentElement.setAttribute('data-theme', saved);
+                document.getElementById('theme-toggle').textContent = saved === 'dark' ? 'light' : 'dark';
+            }
+        })();
+
+        function ok(t) { return `<span class="ok">${t}</span>`; }
+        function warn(t) { return `<span class="warn">${t}</span>`; }
+        function bad(t) { return `<span class="bad">${t}</span>`; }
+
+        function dot(type, pulsing) {
+            return `<span class="dot dot-${type}${pulsing ? ' pulse' : ''}"></span>`;
+        }
+
+        function indicator(type, text, pulsing) {
+            return `<span class="indicator">${dot(type, pulsing)} ${text}</span>`;
+        }
+
+        function svcStatus(val) {
+            if (val === 'active' || val === 'listening') return indicator('ok', ok(val), true);
+            if (val === 'inactive') return indicator('bad', bad(val));
+            return indicator('warn', warn(val));
+        }
+
+        function barColor(pct) {
+            if (pct < 60) return 'var(--accent)';
+            if (pct < 80) return 'var(--amber)';
+            return 'var(--red)';
+        }
+
+        function bar(pct) {
+            return `<div class="bar-container"><div class="bar-fill" style="width:${pct}%;background:${barColor(pct)}"></div></div>`;
+        }
+
+        function row(label, value) {
+            return `<div class="status-row"><span class="status-label">${label}</span><span class="status-value">${value}</span></div>`;
+        }
+
+        function buildChart(daily) {
+            if (!daily || daily.length === 0) return '<div style="color:var(--text-faint);font-size:13px;">no data</div>';
+            const max = Math.max(...daily.map(d => d.views), 1);
+            return '<div class="chart-container">' + daily.map(d => {
+                const pct = (d.views / max) * 100;
+                const label = d.day.slice(5); // MM-DD
+                return `<div class="chart-bar-wrap">
+                    <div class="chart-value">${d.views}</div>
+                    <div class="chart-bar-track">
+                        <div class="chart-bar" style="height:${Math.max(pct, 3)}%" title="${d.day}: ${d.views} views"></div>
+                    </div>
+                    <div class="chart-label">${label}</div>
+                </div>`;
+            }).join('') + '</div>';
+        }
+
+        function render(d) {
+            const s = d.security;
+            const sys = d.system;
+            const svc = d.services;
+            const ssl = d.ssl;
+            const bk = d.backups;
+            const tr = d.traffic;
+
+            let sslStatus;
+            if (ssl.days_left > 30) sslStatus = indicator('ok', ok(`${ssl.days_left} days left`));
+            else if (ssl.days_left > 7) sslStatus = indicator('warn', warn(`${ssl.days_left} days left`));
+            else if (ssl.days_left > 0) sslStatus = indicator('bad', bad(`${ssl.days_left} days left!`));
+            else sslStatus = indicator('bad', bad('unknown'));
+
+            const sshPw = s.ssh.password_auth === 'no' ? indicator('ok', ok('disabled')) : indicator('bad', bad('ENABLED'));
+            const sshRoot = s.ssh.root_login === 'no' ? indicator('ok', ok('disabled')) : indicator('bad', bad('ENABLED'));
+            const uaStatus = s.unattended_upgrades === 'active' ? indicator('ok', ok('active')) : indicator('warn', warn(s.unattended_upgrades));
+            const tokensOff = s.nginx_hardening.server_tokens_off ? indicator('ok', ok('yes')) : indicator('bad', bad('no'));
+            const hiddenBlocked = s.nginx_hardening.hidden_files_blocked ? indicator('ok', ok('yes')) : indicator('bad', bad('no'));
+            const f2bStatus = s.fail2ban.running ? indicator('ok', ok('active'), true) : indicator('bad', bad('down'));
+
+            let bannedHtml = '';
+            if (s.fail2ban.banned_ips && s.fail2ban.banned_ips.trim()) {
+                bannedHtml = `<div class="banned-list">banned: ${s.fail2ban.banned_ips}</div>`;
+            }
+
+            // Tracked paths
+            let pathsHtml = '';
+            if (tr.tracked_paths && tr.tracked_paths.length > 0) {
+                pathsHtml = tr.tracked_paths.map(p =>
+                    `<div class="paths-row">
+                        <span class="paths-path">${p.path}</span>
+                        <span class="paths-title">${p.title.split(' — ')[0] || ''}</span>
+                    </div>`
+                ).join('');
+            } else {
+                pathsHtml = '<div style="color:var(--text-faint);font-size:13px;">no paths tracked</div>';
+            }
+
+            document.getElementById('dashboard-content').innerHTML = `
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-title">services</div>
+                        ${row('nginx', svcStatus(svc.nginx))}
+                        ${row('webhook (systemd)', svcStatus(svc.webhook))}
+                        ${row('node :3100', svcStatus(svc.node_port_3100))}
+                        ${row('ssl certificate', sslStatus)}
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">system</div>
+                        ${row('uptime', ok(sys.uptime))}
+                        ${row('load (1/5/15)', sys.load.join(' / '))}
+                        ${row('memory', `${sys.memory.used_mb}/${sys.memory.total_mb} MB (${sys.memory.percent}%)`)}
+                        ${bar(sys.memory.percent)}
+                        <div style="height:8px"></div>
+                        ${row('disk', `${sys.disk.used}/${sys.disk.total} (${sys.disk.percent}%)`)}
+                        ${bar(sys.disk.percent)}
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">security</div>
+                        ${row('ufw firewall', s.ufw.status === 'active' ? indicator('ok', ok('active'), true) : indicator('bad', bad(s.ufw.status)))}
+                        ${row('open ports', s.ufw.open_ports || 'none')}
+                        ${row('password auth', sshPw)}
+                        ${row('root login', sshRoot)}
+                        ${row('unattended upgrades', uaStatus)}
+                        ${row('server_tokens off', tokensOff)}
+                        ${row('hidden files blocked', hiddenBlocked)}
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">fail2ban · sshd</div>
+                        ${row('status', f2bStatus)}
+                        ${row('currently banned', s.fail2ban.current_banned > 0
+                            ? warn(s.fail2ban.current_banned)
+                            : ok('0')
+                        )}
+                        ${row('total banned (all time)', String(s.fail2ban.total_banned))}
+                        ${row('auth failures (24h)', s.auth_failures_24h > 10
+                            ? warn(s.auth_failures_24h)
+                            : String(s.auth_failures_24h)
+                        )}
+                        ${bannedHtml}
+                    </div>
+
+                    <div class="card grid-full">
+                        <div class="card-title">traffic · goatcounter</div>
+                        <div class="traffic-stats">
+                            <div class="traffic-stat">
+                                <span class="traffic-number">${tr.today_views}</span>
+                                <span class="traffic-label">today</span>
+                            </div>
+                            <div class="traffic-stat">
+                                <span class="traffic-number">${tr.total_views}</span>
+                                <span class="traffic-label">last 7 days</span>
+                            </div>
+                        </div>
+                        ${buildChart(tr.daily)}
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">tracked paths</div>
+                        ${pathsHtml}
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">maintenance</div>
+                        ${row('last backup', bk.last_backup)}
+                        ${row('last healthcheck', bk.last_healthcheck)}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function fetchStatus() {
+            try {
+                const resp = await fetch('data.json?t=' + Date.now());
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const data = await resp.json();
+                document.getElementById('collected-at').innerHTML =
+                    `last collected: <span>${data.local_time}</span>`;
+                render(data);
+                document.getElementById('refresh-info').textContent =
+                    'updated ' + new Date().toLocaleTimeString();
+            } catch (err) {
+                document.getElementById('dashboard-content').innerHTML =
+                    `<div class="error-msg">
+                        failed to load status data<br>
+                        <span style="font-size:12px;color:var(--text-faint)">${err.message}</span><br>
+                        <span style="font-size:12px;color:var(--text-faint)">has status-collector.sh run yet?</span>
+                    </div>`;
+            }
+        }
+
+        fetchStatus();
+        setInterval(fetchStatus, 5 * 60 * 1000);
+    </script>
+</body>
+</html>
