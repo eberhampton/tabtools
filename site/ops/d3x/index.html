@@ -56,6 +56,8 @@
             align-items: center;
             padding: 16px 24px;
             border-bottom: 1px solid var(--border-panel);
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .logo { font-size: 18px; font-weight: bold; letter-spacing: 1px; }
@@ -71,10 +73,11 @@
             color: var(--text-muted);
             font-family: 'Courier New', monospace;
             font-size: 12px;
-            padding: 4px 10px;
+            padding: 6px 12px;
             cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 1px;
+            min-height: 32px;
         }
         .theme-toggle:hover { color: var(--text-primary); }
 
@@ -101,7 +104,35 @@
         }
         .grid-full { grid-column: 1 / -1; }
 
-        @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+        @media (max-width: 700px) {
+            .grid { grid-template-columns: 1fr; }
+            .container { padding: 16px 12px; }
+            .header { padding: 12px 14px; }
+            .footer { padding: 12px 14px; }
+            .card { padding: 14px 14px; }
+            .status-row { font-size: 12px; gap: 8px; }
+            .status-label { min-width: 0; flex-shrink: 1; }
+            .status-value { flex-shrink: 0; }
+            .traffic-number { font-size: 24px; }
+            .traffic-label { font-size: 10px; }
+            .chart-container { height: 70px; gap: 2px; }
+            .chart-label { font-size: 8px; }
+            .chart-value { font-size: 8px; }
+            .paths-row { font-size: 12px; }
+            .paths-title { display: none; }
+            .refresh-info { display: none; }
+        }
+
+        @media (max-width: 400px) {
+            .container { padding: 12px 8px; }
+            .header { padding: 10px 10px; }
+            .card { padding: 12px 10px; }
+            .status-row { font-size: 11px; padding: 5px 0; }
+            .logo { font-size: 16px; }
+            .card-title { font-size: 10px; letter-spacing: 1.5px; }
+            .traffic-stats { gap: 16px; }
+            .traffic-number { font-size: 22px; }
+        }
 
         .card {
             background: var(--surface);
@@ -126,10 +157,11 @@
             align-items: center;
             padding: 6px 0;
             font-size: 13px;
+            gap: 12px;
         }
         .status-row + .status-row { border-top: 1px solid var(--border-subtle); }
-        .status-label { color: var(--text-muted); }
-        .status-value { color: var(--text-primary); text-align: right; }
+        .status-label { color: var(--text-muted); white-space: nowrap; }
+        .status-value { color: var(--text-primary); text-align: right; white-space: nowrap; }
 
         .ok { color: var(--accent); }
         .warn { color: var(--amber); }
@@ -171,10 +203,13 @@
             gap: 4px;
             height: 80px;
             padding-top: 8px;
+            overflow-x: auto;
+            min-width: 0;
         }
 
         .chart-bar-wrap {
             flex: 1;
+            min-width: 28px;
             display: flex;
             flex-direction: column;
             align-items: center;
