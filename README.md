@@ -70,7 +70,7 @@ tabtools/
 
 ## About
 
-TabTools is built and maintained by [Eber (Tochina)](https://github.com/eberhampton). AI assists with code generation (primarily Claude). I handle infrastructure, deployment, design direction, and all operational decisions. This collaboration is disclosed openly — the same approach used across my other projects at [bobrew.dev](https://bobrew.dev).
+TabTools is built and maintained by elhbridge. AI assists with code generation (primarily Claude). I handle infrastructure, deployment, design direction, and all operational decisions.
 
 ## License
 
